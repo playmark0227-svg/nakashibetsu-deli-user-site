@@ -9,49 +9,51 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const shopId = searchParams.get('shop_id');
+    const shopId = searchParams.get('shopId') || searchParams.get('shop_id');
+    const q = searchParams.get('q');
+    const minAge = searchParams.get('minAge');
+    const maxAge = searchParams.get('maxAge');
+    const minHeight = searchParams.get('minHeight');
+    const maxHeight = searchParams.get('maxHeight');
+    const isNew = searchParams.get('isNew');
 
     let query = supabase
       .from('girls')
       .select('*')
       .order('ranking', { ascending: true });
 
-    // shop_id が指定されていればフィルター
     if (shopId) {
       query = query.eq('shop_id', shopId);
+    }
+    if (q) {
+      query = query.ilike('name', `%${q}%`);
+    }
+    if (minAge) {
+      query = query.gte('age', parseInt(minAge));
+    }
+    if (maxAge) {
+      query = query.lte('age', parseInt(maxAge));
+    }
+    if (minHeight) {
+      query = query.gte('height', parseInt(minHeight));
+    }
+    if (maxHeight) {
+      query = query.lte('height', parseInt(maxHeight));
+    }
+    if (isNew === 'true') {
+      query = query.eq('is_new', true);
     }
 
     const { data: girls, error } = await query;
 
     if (error) {
       console.error('Failed to fetch girls:', error);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Failed to fetch girls',
-          details: error.message,
-          shop_id: shopId || 'all'
-        },
-        { status: 500 }
-      );
+      return NextResponse.json([], { status: 500 });
     }
 
-    console.log(`Found ${girls?.length || 0} girls${shopId ? ` for shop_id: ${shopId}` : ' (all shops)'}`);
-
-    return NextResponse.json({
-      success: true,
-      girls: girls || [],
-      count: girls?.length || 0
-    });
-  } catch (error: any) {
+    return NextResponse.json(girls || []);
+  } catch (error: unknown) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        details: error?.message || 'Unknown error'
-      },
-      { status: 500 }
-    );
+    return NextResponse.json([], { status: 500 });
   }
 }

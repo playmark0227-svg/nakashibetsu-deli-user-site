@@ -10,6 +10,7 @@ import { getReviewsByGirlId } from '@/lib/api/reviews';
 import { getPricePlansByShopId } from '@/lib/api/price-plans';
 import { getGirlTodaySchedule } from '@/lib/api/schedules';
 import { Star, Calendar, Clock, Phone, Heart, MessageCircle, MapPin, DollarSign, ArrowLeft, Zap } from 'lucide-react';
+import FavoriteButton from '@/components/FavoriteButton';
 
 // 60秒ごとにキャッシュを更新
 export const revalidate = 60;
@@ -139,13 +140,16 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
                     <Calendar className="inline-block mr-2" size={20} />
                     予約する
                   </Link>
-                  <Link
-                    href={`/reviews/new?girlId=${girl.id}`}
-                    className="block w-full border-2 border-pink-600 text-pink-600 font-bold py-3 px-6 rounded-lg text-center hover:bg-pink-50 transition-all"
-                  >
-                    <MessageCircle className="inline-block mr-2" size={20} />
-                    口コミを書く
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/reviews/new?girlId=${girl.id}`}
+                      className="flex-1 border-2 border-pink-600 text-pink-600 font-bold py-3 px-4 rounded-lg text-center hover:bg-pink-50 transition-all flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle size={18} />
+                      口コミ
+                    </Link>
+                    <FavoriteButton girlId={girl.id} girlName={girl.name} size="lg" className="flex-shrink-0 border-2 border-neutral-200" />
+                  </div>
                 </div>
               </div>
             </div>

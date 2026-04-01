@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { data: shops, error } = await supabase
       .from('shops')
@@ -15,32 +15,12 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Failed to fetch shops:', error);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Failed to fetch shops',
-          details: error.message 
-        },
-        { status: 500 }
-      );
+      return NextResponse.json([], { status: 500 });
     }
 
-    console.log(`Found ${shops?.length || 0} shops`);
-
-    return NextResponse.json({
-      success: true,
-      shops: shops || [],
-      count: shops?.length || 0
-    });
-  } catch (error: any) {
+    return NextResponse.json(shops || []);
+  } catch (error: unknown) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        details: error?.message || 'Unknown error'
-      },
-      { status: 500 }
-    );
+    return NextResponse.json([], { status: 500 });
   }
 }

@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { Search, Heart, Menu, X, Star, TrendingUp, Crown, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { useFavorites } from '@/lib/hooks/useFavorites';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { favorites, loaded } = useFavorites();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +82,18 @@ export default function Header() {
               <span>店舗</span>
             </Link>
             <Link
+              href="/favorites"
+              className="relative px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-rose-500 flex items-center space-x-2 font-medium"
+            >
+              <Heart className="w-4 h-4" />
+              <span>お気に入り</span>
+              {loaded && favorites.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {favorites.length > 9 ? '9+' : favorites.length}
+                </span>
+              )}
+            </Link>
+            <Link
               href="/ranking"
               className="px-5 py-2 rounded-lg bg-gradient-to-r from-rose-400 to-rose-500 text-white font-medium hover:shadow-lg hover:shadow-rose-400/30 transition-all flex items-center space-x-2"
             >
@@ -134,6 +148,21 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               店舗一覧
+            </Link>
+            <Link
+              href="/favorites"
+              className="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors text-gray-700 hover:text-rose-500 font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span className="flex items-center space-x-2">
+                <Heart className="w-4 h-4" />
+                <span>お気に入り</span>
+              </span>
+              {loaded && favorites.length > 0 && (
+                <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  {favorites.length}
+                </span>
+              )}
             </Link>
             <Link
               href="/ranking"

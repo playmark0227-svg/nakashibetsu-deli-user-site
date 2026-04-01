@@ -93,7 +93,7 @@ export default function HomePageClient({ shops, rankedGirls }: HomePageClientPro
                 {/* View count */}
                 <div className="absolute bottom-3 left-3 flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 z-10">
                   <Eye className="w-3 h-3 text-gray-600" />
-                  <span className="text-xs text-gray-600 font-medium">{Math.floor(Math.random() * 1000) + 500}</span>
+                  <span className="text-xs text-gray-600 font-medium">{girl.view_count.toLocaleString()}</span>
                 </div>
 
                 {/* Rating */}
