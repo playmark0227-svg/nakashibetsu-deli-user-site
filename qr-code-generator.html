@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRコード生成 - Velvet予約システム</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .shop-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .shop-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e91e63;
+            margin-bottom: 20px;
+        }
+
+        .qr-canvas {
+            margin: 20px auto;
+            display: block;
+            border: 4px solid #e91e63;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+
+        .url-display {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-size: 0.9em;
+            color: #555;
+            border-left: 4px solid #e91e63;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-download {
+            background: #e91e63;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #c2185b;
+            transform: scale(1.05);
+        }
+
+        .btn-copy {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #1976d2;
+            transform: scale(1.05);
+        }
+
+        .btn-print {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #388e3c;
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .instructions h2 {
+            color: #856404;
+            margin-bottom: 20px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            button, .instructions {
+                display: none;
+            }
+            
+            .shop-grid {
+                display: block;
+                page-break-after: always;
+            }
+            
+            .shop-card {
+                page-break-inside: avoid;
+                margin-bottom: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎫 QRコード生成システム</h1>
+        
+        <div class="shop-grid" id="shopGrid"></div>
+
+        <div class="instructions">
+            <h2>📋 使い方</h2>
+            <ol>
+                <li><strong>ダウンロード:</strong> 各QRコード画像を右クリック → 「名前を付けて画像を保存」</li>
+                <li><strong>印刷:</strong> 「すべて印刷」ボタンをクリック（推奨: カラー、高品質設定）</li>
+                <li><strong>サイズ:</strong> 名刺に印刷する場合は最低 3cm × 3cm 推奨</li>
+                <li><strong>テスト:</strong> 印刷後、必ずスマホでQRコードをスキャンして動作確認</li>
+                <li><strong>URL確認:</strong> 各店舗のURLをクリックすると実際のページが開きます</li>
+            </ol>
+        </div>
+
+        <div class="button-group" style="justify-content: center; margin-top: 30px;">
+            <button class="btn-print" onclick="window.print()">🖨️ すべて印刷</button>
+            <button class="btn-download" onclick="downloadAll()">💾 すべてダウンロード</button>
+        </div>
+
+        <div class="success-message" id="successMessage"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://3002-il4xaruhtlkhd0yoxpuv3-c81df28e.sandbox.novita.ai';
+        
+        const shops = [
+            {
+                id: '11111111-1111-1111-1111-111111111111',
+                name: 'ZERO',
+            },
+            {
+                id: '22222222-2222-2222-2222-222222222222',
+                name: '♪あいどる×美少女系No1♪放課後 中標津店',
+            },
+            {
+                id: '33333333-3333-3333-3333-333333333333',
+                name: 'ブラックチェリー',
+            },
+            // りある人妻の品格中標津の店舗IDをSupabaseで確認して追加してください
+        ];
+
+        function generateQRCodes() {
+            const shopGrid = document.getElementById('shopGrid');
+            shopGrid.innerHTML = '';
+
+            shops.forEach((shop, index) => {
+                const url = `${BASE_URL}/qr/${shop.id}`;
+                const canvasId = `qr-${shop.id}`;
+
+                const shopCard = document.createElement('div');
+                shopCard.className = 'shop-card';
+                shopCard.innerHTML = `
+                    <div class="shop-name">${shop.name}</div>
+                    <canvas id="${canvasId}"></canvas>
+                    <div class="url-display">
+                        <a href="${url}" target="_blank" style="color: #e91e63; text-decoration: none;">
+                            ${url}
+                        </a>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-download" onclick="downloadQR('${canvasId}', '${shop.name}')">
+                            💾 ダウンロード
+                        </button>
+                        <button class="btn-copy" onclick="copyURL('${url}')">
+                            📋 URLコピー
+                        </button>
+                    </div>
+                `;
+                shopGrid.appendChild(shopCard);
+
+                // QRコード生成
+                setTimeout(() => {
+                    QRCode.toCanvas(
+                        document.getElementById(canvasId),
+                        url,
+                        {
+                            width: 300,
+                            margin: 2,
+                            color: {
+                                dark: '#000000',
+                                light: '#FFFFFF'
+                            },
+                            errorCorrectionLevel: 'H'
+                        },
+                        (error) => {
+                            if (error) console.error(error);
+                        }
+                    );
+                }, index * 100);
+            });
+        }
+
+        function downloadQR(canvasId, shopName) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = `QR_${shopName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            showSuccess(`${shopName} のQRコードをダウンロードしました！`);
+        }
+
+        function downloadAll() {
+            shops.forEach((shop, index) => {
+                setTimeout(() => {
+                    downloadQR(`qr-${shop.id}`, shop.name);
+                }, index * 500);
+            });
+        }
+
+        function copyURL(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showSuccess('URLをクリップボードにコピーしました！');
+            }).catch(err => {
+                console.error('コピーに失敗しました:', err);
+            });
+        }
+
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // ページ読み込み時に実行
+        window.addEventListener('load', generateQRCodes);
+    </script>
+</body>
+</html>
