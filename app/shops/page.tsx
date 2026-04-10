@@ -4,186 +4,129 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
-import { Store, MapPin, Phone, Clock, Users, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react';
 
-// 60秒ごとにキャッシュを更新
 export const revalidate = 60;
 
 export default async function ShopsPage() {
   const shops = await getAllShops();
-  
-  // 各店舗の女の子の数を取得
+
   const shopsWithGirlCount = await Promise.all(
     shops.map(async (shop) => {
       const girls = await getGirlsByShopId(shop.id);
-      return {
-        ...shop,
-        girlCount: girls.length,
-      };
+      return { ...shop, girlCount: girls.length };
     })
   );
+
+  const totalCasts = shopsWithGirlCount.reduce((sum, shop) => sum + shop.girlCount, 0);
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 text-white py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Store size={40} />
-                <h1 className="text-3xl md:text-4xl font-bold">店舗一覧</h1>
+      <main className="min-h-screen bg-[#faf7f2]">
+        {/* Header */}
+        <section className="bg-[#0b0a09] text-white py-24 md:py-32 grain relative">
+          <div className="container mx-auto px-6 relative text-center">
+            <div className="text-[11px] tracking-[0.4em] text-[#c9a961] uppercase mb-4">Our Shops</div>
+            <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">店舗一覧</h1>
+            <div className="hairline-gold w-16 mx-auto mb-6" />
+            <p className="text-sm text-neutral-400 tracking-wider">
+              中標津エリアの厳選店舗
+            </p>
+
+            <div className="mt-12 flex items-center justify-center gap-12">
+              <div>
+                <div className="font-serif text-4xl text-white">{String(shops.length).padStart(2, '0')}</div>
+                <div className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase mt-2">Shops</div>
               </div>
-              <p className="text-lg md:text-xl opacity-90">
-                中標津エリアの優良デリヘル店舗
-              </p>
+              <div className="w-px h-12 bg-[#2a2620]" />
+              <div>
+                <div className="font-serif text-4xl text-white">{String(totalCasts).padStart(2, '0')}</div>
+                <div className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase mt-2">Casts</div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Shops List */}
-        <section className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Stats */}
-            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-gray-600 mb-1">登録店舗数</div>
-                  <div className="text-3xl font-bold text-pink-600">{shops.length}店舗</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600 mb-1">総在籍キャスト</div>
-                  <div className="text-3xl font-bold text-purple-600">
-                    {shopsWithGirlCount.reduce((sum, shop) => sum + shop.girlCount, 0)}名
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Shop Cards */}
-            <div className="space-y-6">
-              {shopsWithGirlCount.map((shop) => (
-                <Link
-                  key={shop.id}
-                  href={`/shops/${shop.id}`}
-                  className="block bg-white rounded-xl shadow-md hover:shadow-xl transition-all transform hover:scale-[1.02] overflow-hidden"
-                >
-                  <div className="flex flex-col md:flex-row">
-                    {/* Shop Image */}
-                    <div className="w-full md:w-64 flex-shrink-0">
-                      <div className="relative aspect-[4/5] overflow-hidden">
-                        {shop.image_url ? (
-                          <Image
-                            src={shop.image_url}
-                            alt={shop.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 256px"
-                            className="object-cover"
-                            priority={false}
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
-                            <Store className="text-white" size={64} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Shop Info */}
-                    <div className="flex-1 p-6">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
-                          {shop.name}
-                        </h2>
-                        {shop.description && (
-                          <p className="text-gray-600 leading-relaxed">
-                            {shop.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex-shrink-0 ml-4">
-                        <div className="bg-pink-100 text-pink-700 px-4 py-2 rounded-lg text-center">
-                          <div className="text-xs font-semibold mb-1">在籍キャスト</div>
-                          <div className="text-2xl font-bold">{shop.girlCount}名</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Info Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      {/* Address */}
-                      <div className="flex items-start gap-3">
-                        <MapPin className="text-gray-400 flex-shrink-0 mt-1" size={20} />
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">エリア</div>
-                          <div className="text-sm text-gray-800">{shop.address}</div>
-                        </div>
-                      </div>
-
-                      {/* Phone */}
-                      <div className="flex items-start gap-3">
-                        <Phone className="text-gray-400 flex-shrink-0 mt-1" size={20} />
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">電話番号</div>
-                          <div className="text-sm text-gray-800 font-semibold">{shop.phone}</div>
-                        </div>
-                      </div>
-
-                      {/* Business Hours */}
-                      <div className="flex items-start gap-3">
-                        <Clock className="text-gray-400 flex-shrink-0 mt-1" size={20} />
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">営業時間</div>
-                          <div className="text-sm text-gray-800">{shop.business_hours}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Users size={16} />
-                        <span>キャスト一覧を見る</span>
-                      </div>
-                      <ArrowRight className="text-pink-600" size={20} />
-                    </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* No Shops Message */}
-            {shops.length === 0 && (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <Store className="mx-auto mb-4 text-gray-300" size={64} />
-                <p className="text-gray-500 text-lg">店舗がまだ登録されていません</p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl shadow-xl p-8 md:p-12 text-center text-white">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                お気に入りの女の子を見つけよう
-              </h2>
-              <p className="text-lg mb-8 opacity-90">
-                中標津エリア最大級のキャスト数から選べます
-              </p>
+        {/* Shop Cards */}
+        <section className="container mx-auto px-6 py-20 md:py-28">
+          <div className="space-y-24">
+            {shopsWithGirlCount.map((shop, idx) => (
               <Link
-                href="/girls"
-                className="inline-block bg-white text-pink-600 font-bold px-8 py-4 rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
+                key={shop.id}
+                href={`/shops/${shop.id}`}
+                className="group block"
               >
-                女の子一覧を見る
+                <article className={`grid grid-cols-1 lg:grid-cols-12 gap-10 items-center ${idx % 2 === 1 ? 'lg:[&>:first-child]:order-2' : ''}`}>
+                  {/* Image */}
+                  <div className="lg:col-span-7">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-[#f1ede5]">
+                      {shop.image_url ? (
+                        <Image
+                          src={shop.image_url}
+                          alt={shop.name}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 60vw"
+                          className="object-cover lift"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#a9a294] font-serif text-3xl">
+                          {shop.name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="lg:col-span-5">
+                    <div className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-3">
+                      Shop No. {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <h2 className="font-serif text-3xl md:text-4xl text-[#14110d] mb-6 group-hover:text-[#a8862f] transition-colors">
+                      {shop.name}
+                    </h2>
+                    <div className="hairline-gold w-12 mb-6 ml-0 mr-auto" />
+                    {shop.description && (
+                      <p className="text-sm text-[#3a342c] leading-loose mb-8">
+                        {shop.description}
+                      </p>
+                    )}
+
+                    <dl className="space-y-3 text-sm border-t border-[#e7e1d6] pt-6 mb-8">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-4 h-4 text-[#a8862f] mt-0.5 flex-shrink-0" />
+                        <dd className="text-[#14110d]">{shop.address}</dd>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Phone className="w-4 h-4 text-[#a8862f] mt-0.5 flex-shrink-0" />
+                        <dd className="text-[#14110d]">{shop.phone}</dd>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-[#a8862f] mt-0.5 flex-shrink-0" />
+                        <dd className="text-[#14110d]">{shop.business_hours}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-[11px] tracking-[0.2em] uppercase text-[#76705f]">
+                        Cast <span className="font-serif text-lg text-[#14110d] ml-1">{shop.girlCount}</span>
+                      </div>
+                      <div className="inline-flex items-center gap-3 text-[11px] tracking-[0.25em] uppercase text-[#14110d] font-semibold">
+                        <span>View Detail</span>
+                        <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </article>
               </Link>
-            </div>
+            ))}
           </div>
+
+          {shops.length === 0 && (
+            <div className="text-center py-32">
+              <p className="text-sm text-[#76705f] tracking-wider">店舗がまだ登録されていません</p>
+            </div>
+          )}
         </section>
       </main>
       <Footer />

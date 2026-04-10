@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import { getAllGirls } from '@/lib/api/girls';
 import { getAllShops } from '@/lib/api/shops';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
-import { Crown, Eye, Star, TrendingUp, Zap, Clock } from 'lucide-react';
+import { Crown } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -15,99 +15,75 @@ export default async function RankingPage() {
     getAllShops(),
   ]);
 
-  // view_count降順でソート（ランキング）
   const rankedGirls = [...allGirls].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-
   const girlIds = rankedGirls.map(g => g.id);
   const schedules = await getSchedulesForGirls(girlIds);
   const scheduleMap = new Map(schedules.map(s => [s.girl_id, s]));
-
   const shopMap = new Map(shops.map(s => [s.id, s]));
 
-  const medalColors = [
-    'from-yellow-400 to-yellow-600 text-yellow-900',   // 1位
-    'from-gray-300 to-gray-500 text-gray-800',          // 2位
-    'from-orange-400 to-orange-600 text-orange-900',    // 3位
-  ];
+  const top3 = rankedGirls.slice(0, 3);
+  const rest = rankedGirls.slice(3);
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-neutral-50">
-        {/* ページヘッダー */}
-        <section className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 py-16 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
-          </div>
-          <div className="relative container mx-auto px-4 text-center">
-            <div className="inline-flex items-center space-x-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-white" />
-              <span className="text-white font-medium">RANKING</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">人気ランキング</h1>
-            <p className="text-neutral-300 text-lg">閲覧数で決まる、今最も注目のキャスト</p>
+      <main className="min-h-screen bg-[#faf7f2]">
+        {/* Page Header */}
+        <section className="bg-[#0b0a09] text-white py-24 md:py-32 grain relative">
+          <div className="container mx-auto px-6 relative text-center">
+            <div className="text-[11px] tracking-[0.4em] text-[#c9a961] uppercase mb-4">Ranking</div>
+            <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">人気ランキング</h1>
+            <div className="hairline-gold w-16 mx-auto mb-6" />
+            <p className="text-sm text-neutral-400 tracking-wider">
+              閲覧数で決まる、今最も注目のキャスト
+            </p>
           </div>
         </section>
 
-        {/* TOP3 表彰台 */}
-        {rankedGirls.length >= 3 && (
-          <section className="container mx-auto px-4 py-12">
-            <div className="flex items-end justify-center gap-4 md:gap-8">
-              {/* 2位 */}
-              {[1, 0, 2].map((rankIndex) => {
-                const girl = rankedGirls[rankIndex];
+        {/* TOP 3 — Editorial layout */}
+        {top3.length === 3 && (
+          <section className="container mx-auto px-6 py-24 md:py-32">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+              {top3.map((girl, idx) => {
                 const shop = shopMap.get(girl.shop_id);
-                const schedule = scheduleMap.get(girl.id);
-                const isFirst = rankIndex === 0;
-                const heights = ['h-48', 'h-64', 'h-40'];
-                const podiumHeights = [heights[1], heights[0], heights[2]];
-                const displayOrder = [1, 0, 2];
-
+                const rank = idx + 1;
                 return (
                   <Link
                     key={girl.id}
                     href={`/girls/${girl.id}`}
-                    className="group flex flex-col items-center flex-1 max-w-[200px]"
+                    className={`group block ${idx === 0 ? 'md:-mt-8' : ''} ${idx === 2 ? 'md:mt-8' : ''}`}
                   >
-                    {/* ランクバッジ */}
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-xl mb-3 bg-gradient-to-br ${medalColors[rankIndex]}`}>
-                      {rankIndex + 1}
-                    </div>
-
-                    {/* 画像 */}
-                    <div className={`relative w-full aspect-[3/4] ${isFirst ? 'scale-110' : ''} rounded-2xl overflow-hidden shadow-2xl border-2 ${isFirst ? 'border-yellow-400' : 'border-neutral-200'} mb-3 group-hover:shadow-rose-200 transition-all`}>
-                      {isFirst && (
-                        <div className="absolute top-3 right-3 z-10">
-                          <Crown className="w-8 h-8 text-yellow-400 drop-shadow-lg" />
-                        </div>
-                      )}
-                      {schedule?.instant_available && (
-                        <div className="absolute top-3 left-3 z-10 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 animate-pulse">
-                          <Zap className="w-3 h-3" />
-                          <span>ソク姫</span>
-                        </div>
-                      )}
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#f1ede5] mb-6">
                       <Image
                         src={girl.thumbnail_url || '/placeholder-girl.jpg'}
                         alt={girl.name}
                         fill
-                        sizes="200px"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        priority={rankIndex < 3}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover lift"
+                        priority
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <div className="absolute bottom-3 left-0 right-0 text-center">
-                        <div className="inline-flex items-center space-x-1 bg-white/90 rounded-full px-3 py-1 text-xs">
-                          <Eye className="w-3 h-3 text-neutral-600" />
-                          <span className="font-bold text-neutral-800">{girl.view_count.toLocaleString()}</span>
+                      <div className="absolute top-0 left-0 bg-[#0b0a09] text-[#c9a961] px-4 py-3">
+                        <div className="font-serif text-3xl leading-none">
+                          {String(rank).padStart(2, '0')}
                         </div>
                       </div>
+                      {rank === 1 && (
+                        <div className="absolute top-4 right-4">
+                          <Crown className="w-6 h-6 text-[#c9a961]" strokeWidth={1.5} />
+                        </div>
+                      )}
                     </div>
-
-                    <h3 className="font-bold text-neutral-900 group-hover:text-rose-500 transition-colors text-center text-sm md:text-base">
-                      {girl.name}
-                    </h3>
-                    <p className="text-xs text-neutral-500 text-center">{girl.age}歳 · {shop?.name}</p>
+                    <div className="text-center">
+                      <div className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-2">
+                        Rank {String(rank).padStart(2, '0')}
+                      </div>
+                      <h3 className="font-serif text-2xl text-[#14110d] group-hover:text-[#a8862f] transition-colors">
+                        {girl.name}
+                      </h3>
+                      <p className="text-[11px] tracking-wider text-[#76705f] mt-2">
+                        {girl.age} · T{girl.height} · {shop?.name}
+                      </p>
+                    </div>
                   </Link>
                 );
               })}
@@ -116,14 +92,14 @@ export default async function RankingPage() {
         )}
 
         {/* 4位以降 */}
-        {rankedGirls.length > 3 && (
-          <section className="container mx-auto px-4 pb-16">
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6 flex items-center space-x-2">
-              <Star className="w-6 h-6 text-rose-500" />
-              <span>4位以下のランキング</span>
+        {rest.length > 0 && (
+          <section className="container mx-auto px-6 pb-24 md:pb-32">
+            <div className="hairline mb-12" />
+            <h2 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-10">
+              Rank 04 –
             </h2>
-            <div className="space-y-3">
-              {rankedGirls.slice(3).map((girl, idx) => {
+            <div className="space-y-px bg-[#e7e1d6]">
+              {rest.map((girl, idx) => {
                 const rank = idx + 4;
                 const shop = shopMap.get(girl.shop_id);
                 const schedule = scheduleMap.get(girl.id);
@@ -132,55 +108,41 @@ export default async function RankingPage() {
                   <Link
                     key={girl.id}
                     href={`/girls/${girl.id}`}
-                    className="group flex items-center bg-white rounded-2xl p-4 shadow-sm border border-neutral-200 hover:border-rose-300 hover:shadow-lg transition-all gap-4"
+                    className="group flex items-center bg-white hover:bg-[#faf7f2] px-6 py-5 gap-6 transition-colors"
                   >
-                    {/* ランク番号 */}
-                    <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-neutral-100 font-bold text-neutral-500 text-lg">
-                      {rank}
+                    <div className="font-serif text-2xl text-[#a9a294] w-10 flex-shrink-0">
+                      {String(rank).padStart(2, '0')}
                     </div>
 
-                    {/* サムネイル */}
-                    <div className="relative w-16 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-neutral-100">
+                    <div className="relative w-14 h-18 flex-shrink-0 bg-[#f1ede5] overflow-hidden" style={{ aspectRatio: '3/4' }}>
                       <Image
                         src={girl.thumbnail_url || '/placeholder-girl.jpg'}
                         alt={girl.name}
                         fill
-                        sizes="64px"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="56px"
+                        className="object-cover"
                       />
                     </div>
 
-                    {/* 情報 */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-neutral-900 group-hover:text-rose-500 transition-colors truncate">
+                      <h3 className="font-serif text-lg text-[#14110d] group-hover:text-[#a8862f] transition-colors truncate">
                         {girl.name}
                       </h3>
-                      <p className="text-sm text-neutral-500">
-                        {girl.age}歳 · T{girl.height} · {shop?.name}
+                      <p className="text-[11px] tracking-wider text-[#76705f] mt-0.5">
+                        {girl.age} · T{girl.height} · {shop?.name}
                       </p>
-                      <div className="flex items-center gap-3 mt-1">
-                        {girl.is_new && (
-                          <span className="text-xs bg-yellow-100 text-yellow-700 font-bold px-2 py-0.5 rounded-full">NEW</span>
-                        )}
-                        {schedule?.status === 'working' && (
-                          <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Clock className="w-3 h-3" />出勤中
-                          </span>
-                        )}
-                        {schedule?.instant_available && (
-                          <span className="text-xs bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Zap className="w-3 h-3" />ソク姫
-                          </span>
-                        )}
-                      </div>
                     </div>
 
-                    {/* ビュー数 */}
-                    <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                      <div className="flex items-center space-x-1 text-neutral-500 text-sm">
-                        <Eye className="w-4 h-4" />
-                        <span className="font-bold">{girl.view_count.toLocaleString()}</span>
-                      </div>
+                    <div className="hidden md:flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase">
+                      {girl.is_new && (
+                        <span className="text-[#a8862f]">New</span>
+                      )}
+                      {schedule?.status === 'working' && (
+                        <span className="text-[#76705f]">Working</span>
+                      )}
+                      {schedule?.instant_available && (
+                        <span className="text-[#a8862f]">Available</span>
+                      )}
                     </div>
                   </Link>
                 );
@@ -190,9 +152,10 @@ export default async function RankingPage() {
         )}
 
         {rankedGirls.length === 0 && (
-          <div className="container mx-auto px-4 py-20 text-center">
-            <TrendingUp className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <p className="text-neutral-500 text-lg">まだキャストが登録されていません</p>
+          <div className="container mx-auto px-6 py-32 text-center">
+            <p className="text-sm text-[#76705f] tracking-wider">
+              まだキャストが登録されていません
+            </p>
           </div>
         )}
       </main>

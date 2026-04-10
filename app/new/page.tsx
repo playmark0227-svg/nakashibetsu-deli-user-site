@@ -2,11 +2,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import WorkStatusBadge from '@/components/WorkStatusBadge';
 import { getAllShops } from '@/lib/api/shops';
 import { getNewGirls } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
-import { Sparkles, Star, Eye, ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const revalidate = 60;
 
@@ -24,37 +23,35 @@ export default async function NewGirlsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-neutral-50">
-        {/* ページヘッダー */}
-        <section className="bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 py-16 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1))] bg-[length:20px_20px]" />
-          </div>
-          <div className="relative container mx-auto px-4 text-center">
-            <div className="inline-flex items-center space-x-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2 mb-6">
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
-              <span className="text-white font-bold tracking-wider">NEW ARRIVAL</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">新人キャスト</h1>
-            <p className="text-white/90 text-lg mb-2">フレッシュな魅力で登場！</p>
-            <p className="text-white/70 text-base">
-              <span className="font-bold text-white text-2xl">{newGirls.length}</span>名の新人キャストが在籍中
+      <main className="min-h-screen bg-[#faf7f2]">
+        {/* Header */}
+        <section className="bg-[#0b0a09] text-white py-24 md:py-32 grain relative">
+          <div className="container mx-auto px-6 relative text-center">
+            <div className="text-[11px] tracking-[0.4em] text-[#c9a961] uppercase mb-4">New Arrival</div>
+            <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">新人キャスト</h1>
+            <div className="hairline-gold w-16 mx-auto mb-6" />
+            <p className="text-sm text-neutral-400 tracking-wider">
+              <span className="font-serif text-2xl text-[#c9a961] mx-1">{newGirls.length}</span> New Casts
             </p>
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12">
+        <section className="container mx-auto px-6 py-16 md:py-24">
           {newGirls.length === 0 ? (
-            <div className="text-center py-20">
-              <Sparkles className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <p className="text-neutral-500 text-lg">現在、新人キャストはいません</p>
-              <Link href="/girls" className="inline-flex items-center space-x-2 mt-6 px-6 py-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors font-medium">
-                <span>全キャストを見る</span>
-                <ArrowRight className="w-5 h-5" />
+            <div className="text-center py-32">
+              <p className="text-sm text-[#76705f] tracking-wider mb-8">
+                現在、新人キャストはいません
+              </p>
+              <Link
+                href="/girls"
+                className="inline-flex items-center gap-3 px-6 py-3 border border-[#14110d] text-[11px] tracking-[0.25em] uppercase text-[#14110d] hover:bg-[#14110d] hover:text-white transition-colors"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-14">
               {newGirls.map((girl) => {
                 const shop = shopMap.get(girl.shop_id);
                 const schedule = scheduleMap.get(girl.id);
@@ -63,66 +60,36 @@ export default async function NewGirlsPage() {
                   <Link
                     key={girl.id}
                     href={`/girls/${girl.id}`}
-                    className="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-rose-100 transition-all duration-300 transform hover:-translate-y-2 border border-neutral-200 hover:border-rose-300"
+                    className="group block"
                   >
-                    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
-                      {/* NEWバッジ */}
-                      <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
-                        <span>NEW</span>
-                      </div>
-
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#f1ede5] mb-4">
                       <Image
                         src={girl.thumbnail_url || '/placeholder-girl.jpg'}
                         alt={girl.name}
                         fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 50vw, 20vw"
+                        className="object-cover lift"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                      {/* 出勤状況バッジ */}
-                      {schedule && (
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <WorkStatusBadge
-                            status={schedule.status}
-                            instantAvailable={schedule.instant_available}
-                            size="sm"
-                          />
+                      <span className="absolute top-3 left-3 bg-[#c9a961] text-[#0b0a09] text-[9px] tracking-[0.2em] font-bold px-2 py-1 uppercase">
+                        New
+                      </span>
+                      {schedule?.instant_available && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-[#0b0a09]/85 text-white text-[10px] tracking-[0.25em] py-1.5 text-center uppercase">
+                          Available Now
                         </div>
                       )}
                     </div>
 
-                    <div className="p-4">
-                      <h3 className="text-lg font-bold text-neutral-900 mb-1 group-hover:text-rose-500 transition-colors truncate">
+                    <div className="text-center">
+                      <h3 className="font-serif text-xl text-[#14110d] group-hover:text-[#a8862f] transition-colors truncate">
                         {girl.name}
                       </h3>
-                      <p className="text-sm text-neutral-500 mb-1">
-                        {girl.age}歳 · T{girl.height} · B{girl.bust}
+                      <p className="text-[10px] tracking-[0.15em] text-[#76705f] mt-1.5">
+                        {girl.age} · T{girl.height} · B{girl.bust}
                       </p>
                       {shop && (
-                        <p className="text-xs text-neutral-400 truncate">{shop.name}</p>
+                        <p className="text-[10px] text-[#a9a294] mt-1 truncate">{shop.name}</p>
                       )}
-
-                      {/* 出勤時間 */}
-                      {schedule?.status === 'working' && schedule.start_time && (
-                        <div className="mt-2 text-xs text-green-600 font-medium flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{schedule.start_time.substring(0, 5)} 〜 {schedule.end_time?.substring(0, 5)}</span>
-                        </div>
-                      )}
-
-                      {/* ビュー数 */}
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100 text-xs text-neutral-500">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="w-3 h-3" />
-                          <span>{girl.view_count.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                          <span>#{girl.ranking}</span>
-                        </div>
-                      </div>
                     </div>
                   </Link>
                 );

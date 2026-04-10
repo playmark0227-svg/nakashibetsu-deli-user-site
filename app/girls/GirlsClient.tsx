@@ -3,9 +3,8 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import WorkStatusBadge from '@/components/WorkStatusBadge';
 import FavoriteButton from '@/components/FavoriteButton';
-import { Star, Eye, Heart, Zap, Clock } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import type { Girl, Shop } from '@/lib/supabase';
 import type { GirlSchedule } from '@/lib/types';
 
@@ -24,10 +23,7 @@ export default function GirlsClient({ girls, shops }: GirlsClientProps) {
 
   const filteredGirls = useMemo(() => {
     return girls.filter(girl => {
-      // 店舗フィルター
       if (selectedShop !== 'all' && girl.shop_id !== selectedShop) return false;
-
-      // ステータスフィルター
       switch (filter) {
         case 'working':
           return girl.schedule?.status === 'working';
@@ -45,62 +41,53 @@ export default function GirlsClient({ girls, shops }: GirlsClientProps) {
   const instantCount = girls.filter(g => g.schedule?.instant_available).length;
   const newCount = girls.filter(g => g.is_new).length;
 
-  const filterButtons: { key: FilterType; label: string; count: number; icon?: React.ReactNode }[] = [
-    { key: 'all', label: 'すべて', count: girls.length },
-    { key: 'working', label: '出勤中', count: workingCount, icon: <span className="w-2 h-2 rounded-full bg-green-400 inline-block mr-1" /> },
-    { key: 'instant', label: 'ソク姫OK', count: instantCount, icon: <Zap className="w-3 h-3 mr-1" /> },
-    { key: 'new', label: '新人', count: newCount, icon: <Star className="w-3 h-3 mr-1" /> },
+  const filterButtons: { key: FilterType; label: string; count: number }[] = [
+    { key: 'all', label: 'ALL', count: girls.length },
+    { key: 'working', label: 'WORKING', count: workingCount },
+    { key: 'instant', label: 'AVAILABLE', count: instantCount },
+    { key: 'new', label: 'NEW', count: newCount },
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-[#faf7f2]">
       {/* Page Header */}
-      <section className="bg-gradient-to-br from-rose-300 via-rose-300 to-rose-400 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              在籍キャスト一覧
-            </h1>
-            <p className="text-white/90 text-lg">
-              {girls.length}名のキャストがあなたをお待ちしています
-            </p>
-          </div>
+      <section className="bg-[#0b0a09] text-white py-24 md:py-32 grain relative">
+        <div className="container mx-auto px-6 relative text-center">
+          <div className="text-[11px] tracking-[0.4em] text-[#c9a961] uppercase mb-4">Our Cast</div>
+          <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">在籍キャスト</h1>
+          <div className="hairline-gold w-16 mx-auto mb-6" />
+          <p className="text-sm text-neutral-400 tracking-wider">
+            <span className="font-serif text-2xl text-[#c9a961] mx-1">{girls.length}</span> Casts
+          </p>
         </div>
       </section>
 
       {/* Filters */}
-      <section className="bg-white border-b sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* ステータスフィルター */}
+      <section className="bg-white border-b border-[#e7e1d6] sticky top-20 z-40">
+        <div className="container mx-auto px-6 py-5">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
             {filterButtons.map(btn => (
               <button
                 key={btn.key}
                 onClick={() => setFilter(btn.key)}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-4 py-2 text-[11px] tracking-[0.2em] font-semibold uppercase transition-colors border ${
                   filter === btn.key
-                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:border-rose-300 hover:text-rose-500'
+                    ? 'bg-[#14110d] text-white border-[#14110d]'
+                    : 'bg-transparent text-[#76705f] border-[#e7e1d6] hover:border-[#14110d] hover:text-[#14110d]'
                 }`}
               >
-                {btn.icon}
                 {btn.label}
-                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                  filter === btn.key ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500'
-                }`}>
-                  {btn.count}
-                </span>
+                <span className="ml-2 text-[10px] opacity-70">({btn.count})</span>
               </button>
             ))}
 
-            {/* 店舗フィルター */}
             <div className="ml-auto">
               <select
                 value={selectedShop}
                 onChange={e => setSelectedShop(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-rose-400 bg-white"
+                className="px-4 py-2 border border-[#e7e1d6] text-[11px] tracking-[0.15em] uppercase text-[#14110d] bg-white focus:outline-none focus:border-[#14110d]"
               >
-                <option value="all">全店舗</option>
+                <option value="all">ALL SHOPS</option>
                 {shops.map(shop => (
                   <option key={shop.id} value={shop.id}>{shop.name}</option>
                 ))}
@@ -111,103 +98,57 @@ export default function GirlsClient({ girls, shops }: GirlsClientProps) {
       </section>
 
       {/* Girls Grid */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-6 py-16 md:py-24">
         {filteredGirls.length > 0 ? (
           <>
-            <p className="text-sm text-neutral-500 mb-6">
-              {filteredGirls.length}名表示中
+            <p className="text-[11px] tracking-[0.2em] text-[#76705f] uppercase mb-10">
+              {filteredGirls.length} Cast{filteredGirls.length > 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-14">
               {filteredGirls.map((girl) => (
                 <div key={girl.id} className="relative group">
-                  {/* お気に入りボタン */}
                   <div className="absolute top-3 right-3 z-20">
                     <FavoriteButton girlId={girl.id} girlName={girl.name} size="sm" />
                   </div>
 
-                  <Link
-                    href={`/girls/${girl.id}`}
-                    className="block bg-white rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-rose-100 transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-rose-300"
-                  >
-                    {/* 新人バッジ */}
-                    {girl.is_new && (
-                      <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                        NEW
-                      </div>
-                    )}
-
-                    {/* 画像 */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                  <Link href={`/girls/${girl.id}`} className="block">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#f1ede5] mb-4">
                       <Image
                         src={girl.thumbnail_url || '/placeholder-girl.jpg'}
                         alt={girl.name}
                         fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        priority={false}
+                        sizes="(max-width: 768px) 50vw, 20vw"
+                        className="object-cover lift"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-                      {/* 出勤状況バッジ */}
-                      {girl.schedule && (
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <WorkStatusBadge
-                            status={girl.schedule.status}
-                            instantAvailable={girl.schedule.instant_available}
-                            size="sm"
-                          />
+                      {girl.is_new && (
+                        <span className="absolute top-3 left-3 bg-[#c9a961] text-[#0b0a09] text-[9px] tracking-[0.2em] font-bold px-2 py-1 uppercase">
+                          New
+                        </span>
+                      )}
+                      {girl.schedule?.instant_available && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-[#0b0a09]/85 text-white text-[10px] tracking-[0.25em] py-1.5 text-center uppercase">
+                          Available Now
+                        </div>
+                      )}
+                      {girl.schedule?.status === 'working' && !girl.schedule?.instant_available && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-white/90 text-[#14110d] text-[10px] tracking-[0.25em] py-1.5 text-center uppercase">
+                          Working
                         </div>
                       )}
                     </div>
 
-                    {/* 情報 */}
-                    <div className="p-4">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-rose-500 transition-colors truncate">
+                    <div className="text-center px-1">
+                      <h3 className="font-serif text-xl text-[#14110d] group-hover:text-[#a8862f] transition-colors truncate">
                         {girl.name}
                       </h3>
-
-                      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
-                        <span>{girl.age}歳</span>
-                        <span>•</span>
-                        <span>T{girl.height}</span>
-                        <span>•</span>
-                        <span>B{girl.bust}</span>
-                      </div>
-
-                      {/* 出勤時間 */}
-                      {girl.schedule && girl.schedule.status !== 'unknown' && (
-                        <div className="text-xs space-y-1 pt-2 border-t border-gray-100">
-                          {girl.schedule.status === 'working' && girl.schedule.start_time && (
-                            <div className="text-gray-600 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {girl.schedule.start_time.substring(0, 5)} 〜 {girl.schedule.end_time?.substring(0, 5)}
-                            </div>
-                          )}
-                          {girl.schedule.status === 'scheduled' && girl.schedule.start_time && (
-                            <div className="text-blue-600 font-medium">
-                              {girl.schedule.start_time.substring(0, 5)}〜 出勤予定
-                            </div>
-                          )}
-                          {girl.schedule.instant_available && (
-                            <div className="text-rose-600 font-bold flex items-center gap-1">
-                              <Zap className="w-3 h-3" />
-                              今すぐ遊べます！
-                            </div>
-                          )}
-                        </div>
+                      <p className="text-[10px] tracking-[0.15em] text-[#76705f] mt-1.5">
+                        {girl.age} · T{girl.height} · B{girl.bust}
+                      </p>
+                      {girl.schedule?.start_time && girl.schedule.status === 'working' && (
+                        <p className="text-[10px] text-[#a8862f] mt-2 tracking-wider">
+                          {girl.schedule.start_time.substring(0, 5)} – {girl.schedule.end_time?.substring(0, 5)}
+                        </p>
                       )}
-
-                      {/* 閲覧数・評価 */}
-                      <div className="flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="w-3 h-3" />
-                          <span>{girl.view_count.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                          <span>#{girl.ranking}</span>
-                        </div>
-                      </div>
                     </div>
                   </Link>
                 </div>
@@ -215,20 +156,17 @@ export default function GirlsClient({ girls, shops }: GirlsClientProps) {
             </div>
           </>
         ) : (
-          <div className="text-center py-16">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg font-medium mb-2">
-              {filter === 'working' && '現在出勤中のキャストはいません'}
-              {filter === 'instant' && '現在ソク姫対応可能なキャストはいません'}
-              {filter === 'new' && '新人キャストはいません'}
-              {filter === 'all' && 'キャストが登録されていません'}
+          <div className="text-center py-32">
+            <Heart className="w-12 h-12 text-[#e7e1d6] mx-auto mb-6" strokeWidth={1} />
+            <p className="text-sm tracking-wider text-[#76705f] mb-6">
+              該当するキャストが見つかりませんでした
             </p>
             {filter !== 'all' && (
               <button
                 onClick={() => setFilter('all')}
-                className="mt-4 px-6 py-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors font-medium"
+                className="px-6 py-3 border border-[#14110d] text-[11px] tracking-[0.25em] uppercase text-[#14110d] hover:bg-[#14110d] hover:text-white transition-colors"
               >
-                全キャストを表示
+                View All
               </button>
             )}
           </div>

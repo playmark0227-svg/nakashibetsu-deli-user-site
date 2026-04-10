@@ -6,8 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import WorkStatusBadge from '@/components/WorkStatusBadge';
-import { Search, Filter, X, Eye, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Girl {
   id: string;
@@ -42,7 +41,6 @@ function SearchContent() {
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // フィルター状態
   const [selectedShop, setSelectedShop] = useState('');
   const [minAge, setMinAge] = useState('');
   const [maxAge, setMaxAge] = useState('');
@@ -90,10 +88,6 @@ function SearchContent() {
     doSearch(query);
   };
 
-  const handleFilterChange = () => {
-    doSearch(query);
-  };
-
   const clearFilters = () => {
     setSelectedShop('');
     setMinAge('');
@@ -108,142 +102,112 @@ function SearchContent() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-neutral-50">
-        {/* ページヘッダー */}
-        <section className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 py-12">
-          <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-6 text-center">キャスト検索</h1>
+      <main className="min-h-screen bg-[#faf7f2]">
+        {/* Header */}
+        <section className="bg-[#0b0a09] text-white py-20 md:py-24 grain relative">
+          <div className="container mx-auto px-6 relative">
+            <div className="text-center mb-10">
+              <div className="text-[11px] tracking-[0.4em] text-[#c9a961] uppercase mb-4">Search</div>
+              <h1 className="font-serif text-4xl md:text-5xl text-white">キャスト検索</h1>
+            </div>
             <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="relative">
+              <div className="relative border-b border-[#c9a961]">
                 <input
                   type="text"
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  placeholder="名前・店舗名などで検索..."
-                  className="w-full px-6 py-4 pl-14 bg-white rounded-full text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-400 text-base"
+                  placeholder="名前・店舗名で検索..."
+                  className="w-full px-2 py-4 pl-10 bg-transparent text-white placeholder-neutral-500 focus:outline-none text-base"
                 />
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-[#c9a961] w-4 h-4" />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-rose-500 text-white px-6 py-2 rounded-full hover:bg-rose-600 transition-colors font-medium"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-2 text-[10px] tracking-[0.25em] uppercase text-[#c9a961] hover:text-white transition-colors font-semibold"
                 >
-                  検索
+                  Search
                 </button>
               </div>
             </form>
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-8">
-          {/* フィルターパネル */}
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 mb-6">
+        <div className="container mx-auto px-6 py-12">
+          {/* Filter Panel */}
+          <div className="border border-[#e7e1d6] bg-white mb-12">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="w-full flex items-center justify-between px-6 py-4 text-neutral-800 font-semibold hover:bg-neutral-50 rounded-2xl transition-colors"
+              className="w-full flex items-center justify-between px-6 py-4 text-[11px] tracking-[0.25em] uppercase text-[#14110d] font-semibold hover:bg-[#faf7f2] transition-colors"
             >
-              <div className="flex items-center space-x-2">
-                <Filter className="w-5 h-5 text-rose-500" />
-                <span>絞り込み</span>
+              <div className="flex items-center gap-3">
+                <span>Filters</span>
                 {hasActiveFilters && (
-                  <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">ON</span>
+                  <span className="bg-[#c9a961] text-[#0b0a09] text-[9px] font-bold px-2 py-0.5">ON</span>
                 )}
               </div>
-              {showFilters ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
 
             {showFilters && (
-              <div className="px-6 pb-6 border-t border-neutral-100">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  {/* 店舗 */}
+              <div className="px-6 pb-6 border-t border-[#e7e1d6]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">店舗</label>
+                    <label className="block text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Shop</label>
                     <select
                       value={selectedShop}
                       onChange={e => setSelectedShop(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-rose-400 text-sm"
+                      className="w-full px-3 py-2 border border-[#e7e1d6] text-sm focus:outline-none focus:border-[#14110d] bg-white"
                     >
-                      <option value="">全店舗</option>
+                      <option value="">All Shops</option>
                       {shops.map(s => (
                         <option key={s.id} value={s.id}>{s.name}</option>
                       ))}
                     </select>
                   </div>
 
-                  {/* 年齢 */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">年齢</label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="number"
-                        placeholder="18"
-                        min="18" max="50"
-                        value={minAge}
-                        onChange={e => setMinAge(e.target.value)}
-                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-rose-400 text-sm"
-                      />
-                      <span className="text-neutral-400">〜</span>
-                      <input
-                        type="number"
-                        placeholder="50"
-                        min="18" max="50"
-                        value={maxAge}
-                        onChange={e => setMaxAge(e.target.value)}
-                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-rose-400 text-sm"
-                      />
+                    <label className="block text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Age</label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" placeholder="18" min="18" max="50" value={minAge} onChange={e => setMinAge(e.target.value)} className="w-full px-3 py-2 border border-[#e7e1d6] text-sm focus:outline-none focus:border-[#14110d]" />
+                      <span className="text-[#a9a294]">–</span>
+                      <input type="number" placeholder="50" min="18" max="50" value={maxAge} onChange={e => setMaxAge(e.target.value)} className="w-full px-3 py-2 border border-[#e7e1d6] text-sm focus:outline-none focus:border-[#14110d]" />
                     </div>
                   </div>
 
-                  {/* 身長 */}
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">身長 (cm)</label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="number"
-                        placeholder="140"
-                        min="140" max="180"
-                        value={minHeight}
-                        onChange={e => setMinHeight(e.target.value)}
-                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-rose-400 text-sm"
-                      />
-                      <span className="text-neutral-400">〜</span>
-                      <input
-                        type="number"
-                        placeholder="180"
-                        min="140" max="180"
-                        value={maxHeight}
-                        onChange={e => setMaxHeight(e.target.value)}
-                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:border-rose-400 text-sm"
-                      />
+                    <label className="block text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Height (cm)</label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" placeholder="140" min="140" max="180" value={minHeight} onChange={e => setMinHeight(e.target.value)} className="w-full px-3 py-2 border border-[#e7e1d6] text-sm focus:outline-none focus:border-[#14110d]" />
+                      <span className="text-[#a9a294]">–</span>
+                      <input type="number" placeholder="180" min="140" max="180" value={maxHeight} onChange={e => setMaxHeight(e.target.value)} className="w-full px-3 py-2 border border-[#e7e1d6] text-sm focus:outline-none focus:border-[#14110d]" />
                     </div>
                   </div>
                 </div>
 
-                {/* 新人のみ */}
-                <div className="mt-4 flex items-center space-x-2">
+                <div className="mt-6 flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="isNew"
                     checked={isNewOnly}
                     onChange={e => setIsNewOnly(e.target.checked)}
-                    className="w-4 h-4 text-rose-500 rounded"
+                    className="w-3 h-3 accent-[#14110d]"
                   />
-                  <label htmlFor="isNew" className="text-sm font-medium text-neutral-700">新人キャストのみ</label>
+                  <label htmlFor="isNew" className="text-xs tracking-wider text-[#3a342c]">New cast only</label>
                 </div>
 
-                <div className="mt-4 flex items-center space-x-3">
+                <div className="mt-6 flex items-center gap-3">
                   <button
-                    onClick={handleFilterChange}
-                    className="px-6 py-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors font-medium text-sm"
+                    onClick={() => doSearch(query)}
+                    className="px-6 py-2 bg-[#14110d] text-white text-[10px] tracking-[0.25em] uppercase font-semibold hover:bg-[#c9a961] hover:text-[#0b0a09] transition-colors"
                   >
-                    絞り込む
+                    Apply
                   </button>
                   {hasActiveFilters && (
                     <button
                       onClick={() => { clearFilters(); setTimeout(() => doSearch(query), 100); }}
-                      className="flex items-center space-x-1 px-4 py-2 border border-neutral-200 text-neutral-600 rounded-full hover:bg-neutral-50 transition-colors text-sm"
+                      className="flex items-center gap-1.5 px-4 py-2 border border-[#e7e1d6] text-[10px] tracking-[0.25em] uppercase text-[#76705f] hover:border-[#14110d] hover:text-[#14110d] transition-colors"
                     >
-                      <X className="w-4 h-4" />
-                      <span>クリア</span>
+                      <X className="w-3 h-3" />
+                      Clear
                     </button>
                   )}
                 </div>
@@ -251,79 +215,66 @@ function SearchContent() {
             )}
           </div>
 
-          {/* 検索結果 */}
+          {/* Results */}
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-14">
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
-                  <div className="aspect-[3/4] bg-neutral-200" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-neutral-200 rounded w-3/4" />
-                    <div className="h-3 bg-neutral-200 rounded w-1/2" />
-                  </div>
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-[3/4] bg-[#f1ede5] mb-4" />
+                  <div className="h-4 bg-[#f1ede5] w-3/4 mx-auto mb-2" />
+                  <div className="h-3 bg-[#f1ede5] w-1/2 mx-auto" />
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <p className="text-neutral-600 mb-4 font-medium">
-                {query ? `「${query}」の` : ''}検索結果：<span className="text-rose-500 font-bold">{results.length}名</span>
+              <p className="text-[11px] tracking-[0.2em] text-[#76705f] uppercase mb-10">
+                {query && <>"{query}" — </>}{results.length} Result{results.length !== 1 ? 's' : ''}
               </p>
 
               {results.length === 0 ? (
-                <div className="text-center py-20">
-                  <Search className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500 text-lg">該当するキャストが見つかりませんでした</p>
-                  <p className="text-neutral-400 text-sm mt-2">別のキーワードや条件でお試しください</p>
-                  <Link href="/girls" className="inline-block mt-6 px-6 py-3 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors font-medium">
-                    全キャストを見る
+                <div className="text-center py-32">
+                  <Search className="w-10 h-10 text-[#e7e1d6] mx-auto mb-6" strokeWidth={1} />
+                  <p className="text-sm text-[#76705f] tracking-wider mb-2">該当するキャストが見つかりませんでした</p>
+                  <p className="text-xs text-[#a9a294] mb-8">別のキーワードまたは条件でお試しください</p>
+                  <Link href="/girls" className="inline-flex items-center gap-3 px-6 py-3 border border-[#14110d] text-[11px] tracking-[0.25em] uppercase text-[#14110d] hover:bg-[#14110d] hover:text-white transition-colors">
+                    View All
                   </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-14">
                   {results.map(girl => {
                     const shop = shops.find(s => s.id === girl.shop_id);
                     return (
                       <Link
                         key={girl.id}
                         href={`/girls/${girl.id}`}
-                        className="group bg-white rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-rose-100 transition-all duration-300 transform hover:-translate-y-1 border border-neutral-200 hover:border-rose-300"
+                        className="group block"
                       >
-                        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
-                          {girl.is_new && (
-                            <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-                              NEW
-                            </div>
-                          )}
+                        <div className="relative aspect-[3/4] overflow-hidden bg-[#f1ede5] mb-4">
                           <Image
                             src={girl.thumbnail_url || '/placeholder-girl.jpg'}
                             alt={girl.name}
                             fill
                             sizes="(max-width: 768px) 50vw, 20vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="object-cover lift"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                          {girl.is_new && (
+                            <span className="absolute top-3 left-3 bg-[#c9a961] text-[#0b0a09] text-[9px] tracking-[0.2em] font-bold px-2 py-1 uppercase">
+                              New
+                            </span>
+                          )}
                         </div>
-                        <div className="p-4">
-                          <h3 className="font-bold text-neutral-900 group-hover:text-rose-500 transition-colors truncate mb-1">
+                        <div className="text-center">
+                          <h3 className="font-serif text-xl text-[#14110d] group-hover:text-[#a8862f] transition-colors truncate">
                             {girl.name}
                           </h3>
-                          <p className="text-xs text-neutral-500 mb-2">
-                            {girl.age}歳 · T{girl.height} · B{girl.bust}
+                          <p className="text-[10px] tracking-[0.15em] text-[#76705f] mt-1.5">
+                            {girl.age} · T{girl.height} · B{girl.bust}
                           </p>
                           {shop && (
-                            <p className="text-xs text-neutral-400 truncate">{shop.name}</p>
+                            <p className="text-[10px] text-[#a9a294] mt-1 truncate">{shop.name}</p>
                           )}
-                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100 text-xs text-neutral-500">
-                            <div className="flex items-center space-x-1">
-                              <Eye className="w-3 h-3" />
-                              <span>{girl.view_count.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                              <span>{girl.ranking}</span>
-                            </div>
-                          </div>
                         </div>
                       </Link>
                     );
@@ -342,8 +293,8 @@ function SearchContent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="animate-pulse text-neutral-400">読み込み中...</div>
+      <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center">
+        <div className="text-[11px] tracking-[0.3em] text-[#76705f] uppercase">Loading...</div>
       </div>
     }>
       <SearchContent />

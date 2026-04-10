@@ -24,9 +24,9 @@ export default function FavoriteButton({ girlId, girlName, size = 'md', classNam
   };
 
   const iconSizes = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    sm: 'w-3.5 h-3.5',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5',
   };
 
   return (
@@ -39,19 +39,19 @@ export default function FavoriteButton({ girlId, girlName, size = 'md', classNam
       aria-label={liked ? `${girlName}をお気に入りから削除` : `${girlName}をお気に入りに追加`}
       className={`
         ${sizeClasses[size]}
-        flex items-center justify-center rounded-full
-        transition-all duration-200 transform hover:scale-110 active:scale-95
+        flex items-center justify-center
+        transition-colors duration-200
         ${liked
-          ? 'bg-rose-500 text-white shadow-lg shadow-rose-300'
-          : 'bg-white/90 text-neutral-400 hover:text-rose-500 hover:bg-white shadow-md'
+          ? 'bg-[#0b0a09] text-[#c9a961]'
+          : 'bg-white/90 backdrop-blur-sm text-[#76705f] hover:text-[#0b0a09]'
         }
         ${className}
       `}
     >
       <Heart
-        className={`${iconSizes[size]} transition-all`}
+        className={iconSizes[size]}
         fill={liked ? 'currentColor' : 'none'}
-        strokeWidth={liked ? 0 : 2}
+        strokeWidth={liked ? 0 : 1.5}
       />
     </button>
   );

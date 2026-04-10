@@ -1,35 +1,30 @@
-import { use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import WorkStatusBadge from '@/components/WorkStatusBadge';
 import { getGirlById } from '@/lib/api/girls';
 import { getShopById } from '@/lib/api/shops';
 import { getReviewsByGirlId } from '@/lib/api/reviews';
 import { getPricePlansByShopId } from '@/lib/api/price-plans';
 import { getGirlTodaySchedule } from '@/lib/api/schedules';
-import { Star, Calendar, Clock, Phone, Heart, MessageCircle, MapPin, DollarSign, ArrowLeft, Zap } from 'lucide-react';
+import { Star, Clock, Phone, MessageCircle, MapPin, ArrowLeft } from 'lucide-react';
 import FavoriteButton from '@/components/FavoriteButton';
 
-// 60秒ごとにキャッシュを更新
 export const revalidate = 60;
 
 export default async function GirlDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
-  // データを並行取得
   const girl = await getGirlById(id);
-  
+
   if (!girl) {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <main className="min-h-screen bg-[#faf7f2] flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">女の子が見つかりませんでした</h1>
-            <Link href="/girls" className="text-pink-600 hover:text-pink-700 font-semibold">
-              一覧に戻る
+            <h1 className="font-serif text-3xl text-[#14110d] mb-6">キャストが見つかりませんでした</h1>
+            <Link href="/girls" className="text-[#a8862f] hover:text-[#14110d] text-sm tracking-wider uppercase">
+              ← Back to Cast
             </Link>
           </div>
         </main>
@@ -49,12 +44,10 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <main className="min-h-screen bg-[#faf7f2] flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">店舗情報が見つかりませんでした</h1>
-            <Link href="/girls" className="text-pink-600 hover:text-pink-700 font-semibold">
-              一覧に戻る
-            </Link>
+            <h1 className="font-serif text-3xl text-[#14110d] mb-6">店舗情報が見つかりませんでした</h1>
+            <Link href="/girls" className="text-[#a8862f] text-sm tracking-wider uppercase">← Back</Link>
           </div>
         </main>
         <Footer />
@@ -62,9 +55,7 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
     );
   }
 
-  // 承認済みレビューのみを表示
   const approvedReviews = reviews.filter(r => r.approved);
-  
   const avgRating = approvedReviews.length > 0
     ? approvedReviews.reduce((acc, r) => acc + r.rating, 0) / approvedReviews.length
     : 0;
@@ -72,200 +63,177 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
+      <main className="min-h-screen bg-[#faf7f2]">
+        <div className="container mx-auto px-6 py-12 md:py-16">
           {/* Back Button */}
-          <Link 
+          <Link
             href="/girls"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-[11px] tracking-[0.25em] text-[#76705f] hover:text-[#14110d] mb-12 transition-colors uppercase"
           >
-            <ArrowLeft size={20} />
-            <span>一覧に戻る</span>
+            <ArrowLeft size={14} />
+            <span>Back to Cast</span>
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Image Gallery */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
-                <div className="relative aspect-[4/5] bg-gray-200">
-                  {girl.is_new && (
-                    <div className="absolute top-4 right-4 bg-pink-500 text-white text-sm font-bold px-3 py-1 rounded-full z-10">
-                      NEW
-                    </div>
-                  )}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+            {/* Left Column - Image */}
+            <div className="lg:col-span-5">
+              <div className="sticky top-28">
+                <div className="relative aspect-[3/4] bg-[#f1ede5] overflow-hidden mb-6">
                   {girl.thumbnail_url ? (
                     <Image
                       src={girl.thumbnail_url}
                       alt={girl.name}
                       fill
-                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      sizes="(max-width: 1024px) 100vw, 40vw"
                       className="object-cover"
-                      priority={true}
+                      priority
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
-                      <span className="text-6xl">👧</span>
+                    <div className="w-full h-full flex items-center justify-center text-[#a9a294] font-serif text-3xl">
+                      {girl.name}
                     </div>
                   )}
-                </div>
-                
-                {/* Quick Stats */}
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">閲覧数</span>
-                    <span className="font-semibold text-gray-800">{girl.view_count.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">ランキング</span>
-                    <span className="font-semibold text-pink-600">#{girl.ranking}</span>
-                  </div>
-                  {avgRating > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">評価</span>
-                      <div className="flex items-center gap-1">
-                        <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                        <span className="font-semibold text-gray-800">{avgRating.toFixed(1)}</span>
-                        <span className="text-sm text-gray-500">({approvedReviews.length})</span>
-                      </div>
-                    </div>
+                  {girl.is_new && (
+                    <span className="absolute top-4 left-4 bg-[#c9a961] text-[#0b0a09] text-[10px] tracking-[0.25em] font-bold px-3 py-1.5 uppercase">
+                      New
+                    </span>
                   )}
                 </div>
 
-                {/* CTA Buttons */}
-                <div className="p-6 pt-0 space-y-3">
-                  <Link
-                    href={`/booking?girlId=${girl.id}`}
-                    className="block w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg text-center hover:from-pink-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
-                  >
-                    <Calendar className="inline-block mr-2" size={20} />
-                    予約する
-                  </Link>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/reviews/new?girlId=${girl.id}`}
-                      className="flex-1 border-2 border-pink-600 text-pink-600 font-bold py-3 px-4 rounded-lg text-center hover:bg-pink-50 transition-all flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle size={18} />
-                      口コミ
-                    </Link>
-                    <FavoriteButton girlId={girl.id} girlName={girl.name} size="lg" className="flex-shrink-0 border-2 border-neutral-200" />
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-6 text-center">
+                  <div className="border border-[#e7e1d6] py-4">
+                    <div className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-1">Rank</div>
+                    <div className="font-serif text-2xl text-[#a8862f]">#{girl.ranking}</div>
                   </div>
+                  <div className="border border-[#e7e1d6] py-4">
+                    <div className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-1">Rating</div>
+                    <div className="font-serif text-2xl text-[#14110d] flex items-center justify-center gap-1">
+                      {avgRating > 0 ? (
+                        <>
+                          <Star size={14} className="text-[#c9a961] fill-[#c9a961]" />
+                          {avgRating.toFixed(1)}
+                        </>
+                      ) : (
+                        <span className="text-[#a9a294]">—</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <a
+                  href={`tel:${shop.phone.replace(/-/g, '')}`}
+                  className="group flex items-center justify-center gap-3 w-full bg-[#14110d] text-white py-5 mb-3 hover:bg-[#c9a961] hover:text-[#0b0a09] transition-colors"
+                >
+                  <Phone size={16} />
+                  <span className="text-[11px] tracking-[0.25em] font-semibold uppercase">電話で予約</span>
+                </a>
+                <div className="flex gap-3">
+                  <Link
+                    href={`/reviews/new?girlId=${girl.id}`}
+                    className="flex-1 border border-[#14110d] text-[#14110d] py-4 text-center hover:bg-[#14110d] hover:text-white transition-colors text-[11px] tracking-[0.2em] uppercase font-semibold flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle size={14} />
+                    Review
+                  </Link>
+                  <FavoriteButton girlId={girl.id} girlName={girl.name} size="lg" className="border border-[#14110d] aspect-square" />
                 </div>
               </div>
             </div>
 
             {/* Right Column - Details */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Basic Info */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">{girl.name}</h1>
-                <p className="text-gray-600 mb-4">{shop.name}</p>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center p-4 bg-pink-50 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">年齢</div>
-                    <div className="text-2xl font-bold text-pink-600">{girl.age}歳</div>
-                  </div>
-                  <div className="text-center p-4 bg-pink-50 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">身長</div>
-                    <div className="text-2xl font-bold text-pink-600">{girl.height}cm</div>
-                  </div>
-                  <div className="text-center p-4 bg-pink-50 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">血液型</div>
-                    <div className="text-2xl font-bold text-pink-600">{girl.blood_type}型</div>
-                  </div>
-                  <div className="text-center p-4 bg-pink-50 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">スリーサイズ</div>
-                    <div className="text-lg font-bold text-pink-600">{girl.bust}-{girl.waist}-{girl.hip}</div>
-                  </div>
-                </div>
+            <div className="lg:col-span-7 space-y-12">
+              {/* Name & Profile */}
+              <div>
+                <div className="text-[11px] tracking-[0.3em] text-[#a8862f] uppercase mb-3">{shop.name}</div>
+                <h1 className="font-serif text-5xl md:text-6xl text-[#14110d] mb-8 leading-tight">{girl.name}</h1>
+                <div className="hairline-gold w-12 mb-10 ml-0 mr-auto" />
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">プロフィール</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{girl.description}</p>
+                {/* Spec Table */}
+                <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                  <div className="border-t border-[#e7e1d6] pt-4">
+                    <dt className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Age</dt>
+                    <dd className="font-serif text-2xl text-[#14110d]">{girl.age}</dd>
+                  </div>
+                  <div className="border-t border-[#e7e1d6] pt-4">
+                    <dt className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Height</dt>
+                    <dd className="font-serif text-2xl text-[#14110d]">{girl.height}<span className="text-sm text-[#76705f] ml-1">cm</span></dd>
+                  </div>
+                  <div className="border-t border-[#e7e1d6] pt-4">
+                    <dt className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Blood</dt>
+                    <dd className="font-serif text-2xl text-[#14110d]">{girl.blood_type}</dd>
+                  </div>
+                  <div className="border-t border-[#e7e1d6] pt-4">
+                    <dt className="text-[10px] tracking-[0.2em] text-[#a9a294] uppercase mb-2">Size</dt>
+                    <dd className="font-serif text-base text-[#14110d] mt-1">B{girl.bust} W{girl.waist} H{girl.hip}</dd>
+                  </div>
+                </dl>
+
+                <div>
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-4">Profile</h3>
+                  <p className="text-[#3a342c] leading-loose whitespace-pre-wrap">{girl.description}</p>
                 </div>
               </div>
 
-              {/* Work Status - 出勤状況 */}
-              <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl shadow-md p-6 border-2 border-rose-200">
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                  <Clock className="w-6 h-6 text-rose-500" />
-                  <span>本日の出勤状況</span>
-                </h3>
-                
+              {/* Today's Schedule */}
+              <div className="bg-white p-10 border border-[#e7e1d6]">
+                <div className="flex items-center gap-3 mb-6">
+                  <Clock className="w-4 h-4 text-[#a8862f]" />
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase">Today's Schedule</h3>
+                </div>
+
                 {schedule ? (
-                  <div className="space-y-4">
-                    <WorkStatusBadge
-                      status={schedule.status}
-                      instantAvailable={schedule.instant_available}
-                      startTime={schedule.start_time}
-                      endTime={schedule.end_time}
-                      notes={schedule.notes}
-                      size="lg"
-                      showDetails={true}
-                    />
-
-                    {/* ソク姫OK の場合の強調表示 */}
-                    {schedule.status === 'working' && schedule.instant_available && (
-                      <div className="bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-xl p-6 shadow-lg">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <Zap className="w-8 h-8 animate-pulse" />
-                          <h4 className="text-2xl font-bold">今すぐ遊べます！</h4>
+                  <>
+                    {schedule.status === 'working' && (
+                      <div>
+                        <div className="font-serif text-3xl text-[#14110d] mb-2">
+                          {schedule.start_time?.substring(0, 5)} – {schedule.end_time?.substring(0, 5)}
                         </div>
-                        <p className="text-white/90 mb-4 leading-relaxed">
-                          {girl.name}は現在出勤中で、ソク姫対応が可能です！<br />
-                          今すぐお電話いただければ、すぐにご案内できます。
-                        </p>
-                        <a
-                          href={`tel:${shop.phone.replace(/-/g, '')}`}
-                          className="inline-flex items-center space-x-2 bg-white text-rose-500 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                          <Phone className="w-5 h-5" />
-                          <span>{shop.phone} に電話する</span>
-                        </a>
+                        <div className="text-sm text-[#76705f]">本日出勤中</div>
+                        {schedule.instant_available && (
+                          <div className="mt-8 pt-8 border-t border-[#e7e1d6]">
+                            <div className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-3">Available Now</div>
+                            <p className="text-[#3a342c] leading-loose mb-6">
+                              現在ご案内可能です。お電話にてご予約ください。
+                            </p>
+                            <a
+                              href={`tel:${shop.phone.replace(/-/g, '')}`}
+                              className="inline-flex items-center gap-3 px-6 py-3 bg-[#c9a961] text-[#0b0a09] text-[11px] tracking-[0.25em] font-semibold uppercase hover:bg-[#14110d] hover:text-white transition-colors"
+                            >
+                              <Phone size={14} />
+                              {shop.phone}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
-
-                    {/* 出勤予定の場合 */}
                     {schedule.status === 'scheduled' && (
-                      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                        <p className="text-blue-800 font-medium">
-                          📅 {schedule.start_time?.substring(0, 5)}〜 出勤予定です。<br />
-                          事前予約を承っております。
-                        </p>
+                      <div>
+                        <div className="font-serif text-3xl text-[#14110d] mb-2">
+                          {schedule.start_time?.substring(0, 5)} –
+                        </div>
+                        <div className="text-sm text-[#76705f]">出勤予定</div>
                       </div>
                     )}
-                  </div>
+                    {schedule.status === 'off' && (
+                      <div className="text-sm text-[#76705f]">本日はお休みです</div>
+                    )}
+                  </>
                 ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                    <p className="text-gray-600">
-                      本日の出勤情報は未定です。<br />
-                      店舗にお問い合わせください。
-                    </p>
-                    <a
-                      href={`tel:${shop.phone.replace(/-/g, '')}`}
-                      className="inline-flex items-center space-x-2 mt-4 text-rose-500 hover:text-rose-600 font-semibold"
-                    >
-                      <Phone className="w-4 h-4" />
-                      <span>{shop.phone}</span>
-                    </a>
+                  <div className="text-sm text-[#76705f]">
+                    本日の出勤情報は未定です。詳しくはお電話にてお問い合わせください。
                   </div>
                 )}
               </div>
 
               {/* Charm Points */}
               {girl.charm_points && girl.charm_points.length > 0 && (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <Heart className="text-pink-600" size={20} />
-                    チャームポイント
-                  </h3>
+                <div>
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-6">Charm Points</h3>
                   <div className="flex flex-wrap gap-2">
-                    {girl.charm_points.map((point, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm font-semibold"
-                      >
+                    {girl.charm_points.map((point, i) => (
+                      <span key={i} className="px-4 py-2 border border-[#e7e1d6] text-sm text-[#3a342c]">
                         {point}
                       </span>
                     ))}
@@ -275,15 +243,12 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
 
               {/* Available Options */}
               {girl.available_options && girl.available_options.length > 0 && (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">対応可能オプション</h3>
+                <div>
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-6">Options</h3>
                   <div className="flex flex-wrap gap-2">
-                    {girl.available_options.map((option, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold"
-                      >
-                        {option}
+                    {girl.available_options.map((opt, i) => (
+                      <span key={i} className="px-4 py-2 border border-[#e7e1d6] text-sm text-[#3a342c]">
+                        {opt}
                       </span>
                     ))}
                   </div>
@@ -292,19 +257,13 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
 
               {/* Price Plans */}
               {pricePlans.length > 0 && (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <DollarSign className="text-pink-600" size={20} />
-                    料金プラン
-                  </h3>
+                <div>
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-6">Price</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {pricePlans.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className="p-4 border-2 border-pink-200 rounded-lg hover:border-pink-500 transition-all"
-                      >
-                        <div className="text-sm text-gray-600 mb-1">{plan.duration}分コース</div>
-                        <div className="text-2xl font-bold text-pink-600">¥{plan.price.toLocaleString()}</div>
+                      <div key={plan.id} className="border border-[#e7e1d6] p-6 hover:border-[#c9a961] transition-colors">
+                        <div className="text-xs tracking-wider text-[#76705f] mb-2">{plan.duration}min</div>
+                        <div className="font-serif text-3xl text-[#14110d]">¥{plan.price.toLocaleString()}</div>
                       </div>
                     ))}
                   </div>
@@ -312,73 +271,64 @@ export default async function GirlDetailPage({ params }: { params: Promise<{ id:
               )}
 
               {/* Shop Info */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">店舗情報</h3>
-                <div className="space-y-3">
+              <div className="bg-white p-10 border border-[#e7e1d6]">
+                <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-6">Shop</h3>
+                <div className="font-serif text-2xl text-[#14110d] mb-6">{shop.name}</div>
+                <dl className="space-y-4 text-sm">
                   <div className="flex items-start gap-3">
-                    <MapPin className="text-gray-400 flex-shrink-0 mt-1" size={20} />
-                    <div>
-                      <div className="font-semibold text-gray-800">{shop.name}</div>
-                      <div className="text-sm text-gray-600">{shop.address}</div>
-                    </div>
+                    <MapPin size={14} className="text-[#a8862f] mt-1 flex-shrink-0" />
+                    <dd className="text-[#3a342c]">{shop.address}</dd>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="text-gray-400 flex-shrink-0" size={20} />
-                    <div className="text-gray-800">{shop.phone}</div>
+                  <div className="flex items-start gap-3">
+                    <Phone size={14} className="text-[#a8862f] mt-1 flex-shrink-0" />
+                    <dd className="text-[#3a342c]">{shop.phone}</dd>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Clock className="text-gray-400 flex-shrink-0" size={20} />
-                    <div className="text-gray-800">{shop.business_hours}</div>
+                  <div className="flex items-start gap-3">
+                    <Clock size={14} className="text-[#a8862f] mt-1 flex-shrink-0" />
+                    <dd className="text-[#3a342c]">{shop.business_hours}</dd>
                   </div>
-                </div>
+                </dl>
+                <Link
+                  href={`/shops/${shop.id}`}
+                  className="inline-flex items-center gap-2 mt-8 text-[11px] tracking-[0.25em] uppercase text-[#14110d] hover:text-[#a8862f] transition-colors font-semibold"
+                >
+                  View Shop Detail →
+                </Link>
               </div>
 
               {/* Reviews */}
               {approvedReviews.length > 0 && (
-                <div className="bg-white rounded-xl shadow-md p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <MessageCircle className="text-pink-600" size={20} />
-                    口コミ ({approvedReviews.length})
+                <div>
+                  <h3 className="text-[10px] tracking-[0.3em] text-[#a8862f] uppercase mb-6">
+                    Reviews ({approvedReviews.length})
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {approvedReviews.slice(0, 5).map((review) => (
-                      <div key={review.id} className="border-b last:border-b-0 pb-4 last:pb-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="font-semibold text-gray-800">{review.user_name}</div>
+                      <div key={review.id} className="border-t border-[#e7e1d6] pt-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="font-serif text-base text-[#14110d]">{review.user_name}</div>
                             {review.verified && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                                認証済み
-                              </span>
+                              <span className="text-[9px] tracking-[0.2em] text-[#a8862f] uppercase">Verified</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star
                                 key={i}
-                                size={14}
-                                className={i < review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}
+                                size={12}
+                                className={i < review.rating ? 'text-[#c9a961] fill-[#c9a961]' : 'text-[#e7e1d6]'}
                               />
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-700 text-sm leading-relaxed">{review.comment}</p>
-                        <div className="text-xs text-gray-500 mt-2">
+                        <p className="text-[#3a342c] text-sm leading-loose">{review.comment}</p>
+                        <div className="text-[10px] text-[#a9a294] mt-3 tracking-wider">
                           {new Date(review.created_at).toLocaleDateString('ja-JP')}
                         </div>
                       </div>
                     ))}
                   </div>
-                  {approvedReviews.length > 5 && (
-                    <div className="text-center mt-6">
-                      <Link
-                        href={`/reviews?girlId=${girl.id}`}
-                        className="text-pink-600 hover:text-pink-700 font-semibold"
-                      >
-                        すべての口コミを見る →
-                      </Link>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

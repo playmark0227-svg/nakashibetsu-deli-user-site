@@ -10,7 +10,6 @@ export default function AgeVerifyGuard({ children }: { children: React.ReactNode
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 年齢確認ページ自体は除外
     if (pathname === '/age-verify') {
       setIsLoading(false);
       setIsVerified(true);
@@ -28,8 +27,8 @@ export default function AgeVerifyGuard({ children }: { children: React.ReactNode
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#0b0a09]">
+        <div className="text-[10px] tracking-[0.4em] text-[#c9a961] uppercase">Loading</div>
       </div>
     );
   }

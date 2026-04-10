@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Heart, Menu, X, Star, TrendingUp, Crown, Sparkles } from 'lucide-react';
+import { Search, Heart, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 
@@ -17,165 +17,132 @@ export default function Header() {
     }
   };
 
+  const navLinks = [
+    { href: '/', label: 'TOP' },
+    { href: '/girls', label: 'CAST' },
+    { href: '/shops', label: 'SHOP' },
+    { href: '/ranking', label: 'RANKING' },
+    { href: '/new', label: 'NEW' },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-      <div className="container mx-auto px-4">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between py-4">
+    <header className="sticky top-0 z-50 bg-[#0b0a09]/95 backdrop-blur-md border-b border-[#2a2620]">
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-rose-300 to-rose-400 rounded-xl flex items-center justify-center shadow-lg shadow-rose-400/30 group-hover:shadow-rose-400/50 transition-all">
-                <Crown className="text-white w-6 h-6" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-pulse"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold bg-gradient-to-r from-rose-500 via-rose-500 to-rose-500 bg-clip-text text-transparent">
-                Velvet
-              </span>
-              <span className="text-xs text-gray-500 -mt-1">中標津プレミアム</span>
-            </div>
+          <Link href="/" className="flex items-baseline space-x-3 group">
+            <span className="font-serif text-3xl tracking-[0.18em] text-white">
+              Velvet
+            </span>
+            <span className="hidden sm:inline text-[10px] tracking-[0.3em] text-[#c9a961] uppercase">
+              Nakashibetsu
+            </span>
           </Link>
 
-          {/* Desktop Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="店舗名・キャスト名で検索..."
-                className="w-full px-5 py-2.5 pl-12 bg-gray-50 border border-gray-200 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-100 transition-all"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-rose-400 to-rose-500 text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:shadow-rose-400/30 transition-all text-sm font-medium"
-              >
-                検索
-              </button>
-            </div>
-          </form>
-
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2">
-            <Link
-              href="/"
-              className="px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-rose-500 flex items-center space-x-2 font-medium"
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span>トップ</span>
-            </Link>
-            <Link
-              href="/girls"
-              className="px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-rose-500 flex items-center space-x-2 font-medium"
-            >
-              <Star className="w-4 h-4" />
-              <span>キャスト</span>
-            </Link>
-            <Link
-              href="/shops"
-              className="px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-rose-500 flex items-center space-x-2 font-medium"
-            >
-              <Crown className="w-4 h-4" />
-              <span>店舗</span>
-            </Link>
+          <nav className="hidden lg:flex items-center">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-5 py-2 text-[12px] tracking-[0.2em] text-neutral-300 hover:text-[#c9a961] transition-colors font-medium"
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/favorites"
-              className="relative px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 hover:text-rose-500 flex items-center space-x-2 font-medium"
+              className="relative ml-3 px-3 py-2 text-neutral-300 hover:text-[#c9a961] transition-colors"
+              aria-label="お気に入り"
             >
-              <Heart className="w-4 h-4" />
-              <span>お気に入り</span>
+              <Heart className="w-[18px] h-[18px]" />
               {loaded && favorites.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-[#c9a961] text-[#0b0a09] text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {favorites.length > 9 ? '9+' : favorites.length}
                 </span>
               )}
             </Link>
-            <Link
-              href="/ranking"
-              className="px-5 py-2 rounded-lg bg-gradient-to-r from-rose-400 to-rose-500 text-white font-medium hover:shadow-lg hover:shadow-rose-400/30 transition-all flex items-center space-x-2"
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="ml-3 p-2 text-neutral-300 hover:text-[#c9a961] transition-colors"
+              aria-label="検索"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>ランキング</span>
-            </Link>
+              <Search className="w-[18px] h-[18px]" />
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
+            className="lg:hidden p-2 text-neutral-300"
+            aria-label="メニュー"
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
-        {/* Mobile Search */}
-        <form onSubmit={handleSearch} className="md:hidden pb-3">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="検索..."
-              className="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:border-rose-400"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-          </div>
-        </form>
-
-        {/* Mobile Navigation */}
+        {/* Search drawer (desktop) */}
         {isMenuOpen && (
-          <nav className="lg:hidden py-4 space-y-2 border-t border-gray-200">
-            <Link
-              href="/"
-              className="block py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors text-gray-700 hover:text-rose-500 font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              トップ
-            </Link>
-            <Link
-              href="/girls"
-              className="block py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors text-gray-700 hover:text-rose-500 font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              キャスト一覧
-            </Link>
-            <Link
-              href="/shops"
-              className="block py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors text-gray-700 hover:text-rose-500 font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              店舗一覧
-            </Link>
+          <div className="hidden lg:block pb-5">
+            <form onSubmit={handleSearch} className="max-w-2xl">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="店舗名・キャスト名で検索"
+                  autoFocus
+                  className="w-full px-5 py-3 pl-12 bg-transparent border border-[#2a2620] text-white placeholder-neutral-500 focus:outline-none focus:border-[#c9a961] transition-colors"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4" />
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <nav className="lg:hidden py-6 border-t border-[#2a2620] space-y-1">
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="検索..."
+                  className="w-full px-4 py-3 pl-11 bg-transparent border border-[#2a2620] text-white placeholder-neutral-500 focus:outline-none focus:border-[#c9a961] text-sm"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4" />
+              </div>
+            </form>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block py-3 text-sm tracking-[0.2em] text-neutral-300 hover:text-[#c9a961] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/favorites"
-              className="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg transition-colors text-gray-700 hover:text-rose-500 font-medium"
+              className="flex items-center justify-between py-3 text-sm tracking-[0.2em] text-neutral-300 hover:text-[#c9a961] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              <span className="flex items-center space-x-2">
+              <span className="flex items-center gap-2">
                 <Heart className="w-4 h-4" />
-                <span>お気に入り</span>
+                FAVORITES
               </span>
               {loaded && favorites.length > 0 && (
-                <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-[#c9a961] text-[#0b0a09] text-[10px] font-bold px-2 py-0.5 rounded-full">
                   {favorites.length}
                 </span>
               )}
             </Link>
-            <Link
-              href="/ranking"
-              className="block py-3 px-4 bg-gradient-to-r from-rose-400 to-rose-500 text-white rounded-lg font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              ランキング
-            </Link>
           </nav>
         )}
       </div>
-
-
     </header>
   );
 }
