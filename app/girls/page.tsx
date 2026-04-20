@@ -5,7 +5,7 @@ import { getAllGirls } from '@/lib/api/girls';
 import { getAllShops } from '@/lib/api/shops';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 
-export const revalidate = 60;
+
 
 export default async function GirlsPage() {
   const [girls, shops] = await Promise.all([

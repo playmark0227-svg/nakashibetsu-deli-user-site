@@ -6,7 +6,7 @@ import { getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react';
 
-export const revalidate = 60;
+
 
 export default async function ShopsPage() {
   const shops = await getAllShops();

@@ -40,13 +40,13 @@ export default function FavoritesPage() {
       return;
     }
 
-    Promise.all([
-      fetch('/api/girls').then(r => r.json()),
-      fetch('/api/shops').then(r => r.json()),
-    ]).then(([girlsData, shopsData]) => {
-      const favGirls = (girlsData as Girl[]).filter(g => favorites.includes(g.id));
-      setGirls(favGirls);
-      setShops(shopsData);
+    import('@/lib/supabase').then(async ({ supabase }) => {
+      const [{ data: girlsData }, { data: shopsData }] = await Promise.all([
+        supabase.from('girls').select('*').in('id', favorites),
+        supabase.from('shops').select('id, name'),
+      ]);
+      setGirls((girlsData as Girl[]) || []);
+      setShops((shopsData as Shop[]) || []);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [favorites, loaded]);
 

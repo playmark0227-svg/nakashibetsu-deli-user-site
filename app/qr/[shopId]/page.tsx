@@ -2,13 +2,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { getShopById } from '@/lib/api/shops';
+import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { Phone, ArrowRight, Clock, User } from 'lucide-react';
 
-// 60秒ごとにキャッシュを更新
-export const revalidate = 60;
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const shops = await getAllShops();
+  return shops.map((s) => ({ shopId: s.id }));
+}
 
 export default async function QRShopPage({ params }: { params: Promise<{ shopId: string }> }) {
   const { shopId } = await params;

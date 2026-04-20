@@ -49,10 +49,9 @@ function SearchContent() {
   const [isNewOnly, setIsNewOnly] = useState(false);
 
   useEffect(() => {
-    fetch('/api/shops')
-      .then(r => r.json())
-      .then(data => setShops(data))
-      .catch(() => {});
+    import('@/lib/supabase').then(({ supabase }) =>
+      supabase.from('shops').select('*').then(({ data }) => setShops((data as Shop[]) || []))
+    ).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -63,18 +62,17 @@ function SearchContent() {
   async function doSearch(q: string) {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (q) params.set('q', q);
-      if (selectedShop) params.set('shopId', selectedShop);
-      if (minAge) params.set('minAge', minAge);
-      if (maxAge) params.set('maxAge', maxAge);
-      if (minHeight) params.set('minHeight', minHeight);
-      if (maxHeight) params.set('maxHeight', maxHeight);
-      if (isNewOnly) params.set('isNew', 'true');
-
-      const res = await fetch(`/api/girls?${params.toString()}`);
-      const data = await res.json();
-      setResults(data);
+      const { supabase } = await import('@/lib/supabase');
+      let query = supabase.from('girls').select('*');
+      if (q) query = query.ilike('name', `%${q}%`);
+      if (selectedShop) query = query.eq('shop_id', selectedShop);
+      if (minAge) query = query.gte('age', parseInt(minAge));
+      if (maxAge) query = query.lte('age', parseInt(maxAge));
+      if (minHeight) query = query.gte('height', parseInt(minHeight));
+      if (maxHeight) query = query.lte('height', parseInt(maxHeight));
+      if (isNewOnly) query = query.eq('is_new', true);
+      const { data } = await query;
+      setResults((data as Girl[]) || []);
     } catch {
       setResults([]);
     } finally {

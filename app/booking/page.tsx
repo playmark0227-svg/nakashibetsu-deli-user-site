@@ -71,26 +71,18 @@ export default function BookingPage() {
     setIsSubmitting(true);
 
     try {
-      // API呼び出し
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const { supabase } = await import('@/lib/supabase');
+      const { error: insertError } = await supabase.from('bookings').insert(formData);
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (!insertError) {
         setSubmitSuccess(true);
-        
+
         // 3秒後にリダイレクト
         setTimeout(() => {
           router.push('/');
         }, 3000);
       } else {
-        alert(result.error || '予約処理中にエラーが発生しました');
+        alert(insertError.message || '予約処理中にエラーが発生しました');
         setIsSubmitting(false);
       }
     } catch (error) {

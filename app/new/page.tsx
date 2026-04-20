@@ -7,7 +7,7 @@ import { getNewGirls } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { ArrowRight } from 'lucide-react';
 
-export const revalidate = 60;
+
 
 export default async function NewGirlsPage() {
   const [newGirls, shops] = await Promise.all([

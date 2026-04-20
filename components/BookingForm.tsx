@@ -38,30 +38,21 @@ export default function BookingForm({ shopId, shopName, shopPhone }: BookingForm
     setError(null);
 
     try {
-      // APIに送信
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          shop_id: shopId,
-          girl_name: formData.girlName || null,
-          customer_name: formData.customerName,
-          phone: formData.phone,
-          email: formData.email || null,
-          booking_date: formData.date,
-          booking_time: formData.time,
-          duration: parseInt(formData.duration),
-          options: formData.options || null,
-          message: formData.message || null,
-        }),
+      const { supabase } = await import('@/lib/supabase');
+      const { error: insertError } = await supabase.from('bookings').insert({
+        shop_id: shopId,
+        girl_name: formData.girlName || null,
+        customer_name: formData.customerName,
+        phone: formData.phone,
+        email: formData.email || null,
+        booking_date: formData.date,
+        booking_time: formData.time,
+        duration: parseInt(formData.duration),
+        options: formData.options || null,
+        message: formData.message || null,
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '予約の送信に失敗しました');
+      if (insertError) {
+        throw new Error(insertError.message || '予約の送信に失敗しました');
       }
 
       // 成功

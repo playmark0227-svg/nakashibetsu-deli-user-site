@@ -7,7 +7,7 @@ import { getAllShops } from '@/lib/api/shops';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { Crown } from 'lucide-react';
 
-export const revalidate = 60;
+
 
 export default async function RankingPage() {
   const [allGirls, shops] = await Promise.all([

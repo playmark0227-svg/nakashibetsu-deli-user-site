@@ -66,26 +66,18 @@ export default function NewReviewPage() {
     setIsSubmitting(true);
 
     try {
-      // API呼び出し
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const { supabase } = await import('@/lib/supabase');
+      const { error: insertError } = await supabase.from('reviews').insert(formData);
 
-      const result = await response.json();
-
-      if (result.success) {
+      if (!insertError) {
         setSubmitSuccess(true);
-        
+
         // 3秒後にリダイレクト
         setTimeout(() => {
           router.push(`/girls/${formData.girlId}`);
         }, 3000);
       } else {
-        alert(result.error || 'レビュー投稿中にエラーが発生しました');
+        alert(insertError.message || 'レビュー投稿中にエラーが発生しました');
         setIsSubmitting(false);
       }
     } catch (error) {

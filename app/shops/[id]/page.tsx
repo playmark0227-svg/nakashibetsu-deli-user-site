@@ -3,13 +3,18 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BookingForm from '@/components/BookingForm';
-import { getShopById } from '@/lib/api/shops';
+import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getPricePlansByShopId } from '@/lib/api/price-plans';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { MapPin, Phone, Clock, ArrowLeft } from 'lucide-react';
 
-export const revalidate = 60;
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const shops = await getAllShops();
+  return shops.map((s) => ({ id: s.id }));
+}
 
 export default async function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

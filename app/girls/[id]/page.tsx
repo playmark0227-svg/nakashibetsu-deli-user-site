@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { getGirlById } from '@/lib/api/girls';
+import { getGirlById, getAllGirls } from '@/lib/api/girls';
 import { getShopById } from '@/lib/api/shops';
 import { getReviewsByGirlId } from '@/lib/api/reviews';
 import { getPricePlansByShopId } from '@/lib/api/price-plans';
@@ -10,7 +10,12 @@ import { getGirlTodaySchedule } from '@/lib/api/schedules';
 import { Star, Clock, Phone, MessageCircle, MapPin, ArrowLeft } from 'lucide-react';
 import FavoriteButton from '@/components/FavoriteButton';
 
-export const revalidate = 60;
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const girls = await getAllGirls();
+  return girls.map((g) => ({ id: g.id }));
+}
 
 export default async function GirlDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

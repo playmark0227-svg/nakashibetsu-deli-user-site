@@ -1,12 +1,18 @@
 import { getShopById } from '@/lib/api/shops';
-import { getGirlById } from '@/lib/api/girls';
+import { getGirlById, getAllGirls } from '@/lib/api/girls';
 import QRBookingForm from '@/components/QRBookingForm';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-// 60秒ごとにキャッシュを更新
-export const revalidate = 60;
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const girls = await getAllGirls();
+  return girls
+    .filter((g) => g.shop_id)
+    .map((g) => ({ shopId: g.shop_id, girlId: g.id }));
+}
 
 export default async function QRBookPage({ 
   params 
