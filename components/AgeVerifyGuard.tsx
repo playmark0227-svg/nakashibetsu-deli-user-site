@@ -12,7 +12,8 @@ export default function AgeVerifyGuard({ children }: { children: React.ReactNode
   useEffect(() => {
     // trailingSlash:true と basePath を併用するため、両方のケースに対応
     const normalized = (pathname || '').replace(/\/+$/, '') || '/';
-    if (normalized === '/age-verify') {
+    // QR フロー (/qr/*) は名刺から来店中の高齢者が対象なので年齢認証をバイパス
+    if (normalized === '/age-verify' || normalized.startsWith('/qr')) {
       setIsLoading(false);
       setIsVerified(true);
       return;

@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
-import { Phone, ArrowRight, Clock, User } from 'lucide-react';
+import { Phone, Clock, ChevronRight } from 'lucide-react';
 
 export const dynamicParams = false;
 
@@ -16,7 +14,7 @@ export async function generateStaticParams() {
 
 export default async function QRShopPage({ params }: { params: Promise<{ shopId: string }> }) {
   const { shopId } = await params;
-  
+
   const [shop, girls] = await Promise.all([
     getShopById(shopId),
     getGirlsByShopId(shopId),
@@ -24,28 +22,20 @@ export default async function QRShopPage({ params }: { params: Promise<{ shopId:
 
   if (!shop) {
     return (
-      <>
-        <Header />
-        <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">店舗が見つかりませんでした</h1>
-            <Link href="/" className="text-rose-500 hover:text-rose-600 font-semibold text-2xl">
-              トップページに戻る
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </>
+      <main className="min-h-screen bg-[#fdfbf6] flex items-center justify-center p-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-6">店舗情報が<br />見つかりません</h1>
+          <p className="text-2xl text-[#555]">お店に直接ご連絡ください</p>
+        </div>
+      </main>
     );
   }
 
-  // キャストのスケジュール情報を取得
-  const girlIds = girls.map(g => g.id);
+  const girlIds = girls.map((g) => g.id);
   const schedules = await getSchedulesForGirls(girlIds);
-  const scheduleMap = new Map(schedules.map(s => [s.girl_id, s]));
-  
-  // キャストにステータスを追加
-  const girlsWithStatus = girls.map(girl => {
+  const scheduleMap = new Map(schedules.map((s) => [s.girl_id, s]));
+
+  const girlsWithStatus = girls.map((girl) => {
     const schedule = scheduleMap.get(girl.id);
     return {
       ...girl,
@@ -54,221 +44,217 @@ export default async function QRShopPage({ params }: { params: Promise<{ shopId:
     };
   });
 
-  // 出勤中のキャストを優先表示
-  const workingGirls = girlsWithStatus.filter(g => g.status === 'working' || g.instant_available);
-  const otherGirls = girlsWithStatus.filter(g => g.status !== 'working' && !g.instant_available);
-  const sortedGirls = [...workingGirls, ...otherGirls];
+  const workingGirls = girlsWithStatus.filter(
+    (g) => g.status === 'working' || g.instant_available
+  );
+  const otherGirls = girlsWithStatus.filter(
+    (g) => g.status !== 'working' && !g.instant_available
+  );
+
+  const phoneHref = shop.phone ? `tel:${shop.phone.replace(/-/g, '')}` : undefined;
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-        {/* 店舗ヘッダー - 高齢者向けに大きく見やすく */}
-        <section className="bg-gradient-to-r from-rose-500 to-pink-600 text-white py-12">
-          <div className="container mx-auto px-6">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                {shop.name}
-              </h1>
-              <p className="text-2xl md:text-3xl mb-8 leading-relaxed">
-                {shop.description}
-              </p>
-              
-              {/* 電話番号 - 大きく目立つように */}
-              <a 
-                href={`tel:${shop.phone?.replace(/-/g, '')}`}
-                className="inline-flex items-center gap-4 bg-white text-rose-600 px-10 py-6 rounded-2xl text-3xl font-bold hover:bg-rose-50 transition-all transform hover:scale-105 shadow-2xl mb-6"
+    <main className="min-h-screen bg-[#fdfbf6] pb-16">
+      {/* 店舗ヘッダー */}
+      <section className="bg-[#1a1a1a] text-white py-10 px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-sm tracking-[0.3em] text-[#c9a961] mb-3 uppercase">
+            Welcome
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            {shop.name}
+          </h1>
+          {phoneHref && (
+            <a
+              href={phoneHref}
+              className="flex items-center justify-center gap-3 bg-[#c9a961] text-[#1a1a1a] rounded-2xl py-5 px-6 text-3xl font-bold active:scale-95 transition-transform shadow-lg"
+            >
+              <Phone size={32} strokeWidth={2.5} />
+              <span>{shop.phone}</span>
+            </a>
+          )}
+          <p className="text-base text-[#c9a961] mt-3">
+            ↑ タップでお電話できます
+          </p>
+          {shop.business_hours && (
+            <div className="flex items-center justify-center gap-2 mt-6 text-lg text-white/80">
+              <Clock size={20} />
+              <span>営業時間 {shop.business_hours}</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 手順説明 */}
+      <section className="max-w-2xl mx-auto px-6 py-8">
+        <div className="bg-white border-2 border-[#c9a961]/30 rounded-3xl p-6 text-center shadow-sm">
+          <div className="text-[#c9a961] text-sm tracking-[0.3em] uppercase mb-2">
+            Step 1
+          </div>
+          <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">
+            お好きな女の子を<br />お選びください
+          </h2>
+          <p className="text-xl text-[#555] mt-3">
+            写真をタップしてください
+          </p>
+        </div>
+      </section>
+
+      {/* 今すぐ遊べるキャスト */}
+      {workingGirls.length > 0 && (
+        <section className="max-w-2xl mx-auto px-6 mb-10">
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-3xl py-5 px-6 mb-6 text-center shadow-md">
+            <div className="text-sm tracking-[0.3em] uppercase opacity-90 mb-1">
+              Available Now
+            </div>
+            <h3 className="text-3xl font-bold">今すぐ会える女の子</h3>
+          </div>
+
+          <div className="space-y-5">
+            {workingGirls.map((girl) => (
+              <QRGirlCard
+                key={girl.id}
+                girl={girl}
+                shopId={shopId}
+                accent="emerald"
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* その他のキャスト */}
+      {otherGirls.length > 0 && (
+        <section className="max-w-2xl mx-auto px-6">
+          <div className="bg-[#1a1a1a] text-white rounded-3xl py-5 px-6 mb-6 text-center shadow-md">
+            <div className="text-sm tracking-[0.3em] uppercase text-[#c9a961] mb-1">
+              All Cast
+            </div>
+            <h3 className="text-3xl font-bold">在籍キャスト</h3>
+          </div>
+
+          <div className="space-y-5">
+            {otherGirls.map((girl) => (
+              <QRGirlCard
+                key={girl.id}
+                girl={girl}
+                shopId={shopId}
+                accent="default"
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* キャストなし */}
+      {workingGirls.length === 0 && otherGirls.length === 0 && (
+        <section className="max-w-2xl mx-auto px-6 mt-6">
+          <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+            <p className="text-2xl text-[#333] font-bold mb-3">
+              現在キャストの登録がありません
+            </p>
+            <p className="text-lg text-[#666] mb-6">
+              お電話でお問い合わせください
+            </p>
+            {phoneHref && (
+              <a
+                href={phoneHref}
+                className="inline-flex items-center gap-3 bg-[#c9a961] text-[#1a1a1a] rounded-2xl py-5 px-8 text-2xl font-bold active:scale-95 transition-transform shadow"
               >
-                <Phone size={40} />
+                <Phone size={28} />
                 <span>{shop.phone}</span>
               </a>
-              
-              {/* 営業時間 */}
-              {shop.business_hours && (
-                <div className="flex items-center justify-center gap-3 text-2xl">
-                  <Clock size={32} />
-                  <span>営業時間: {shop.business_hours}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* キャスト一覧 - 高齢者向けに大きく分かりやすく */}
-        <section className="container mx-auto px-6 py-16">
-          <div className="max-w-6xl mx-auto">
-            
-            {/* 案内テキスト */}
-            <div className="bg-blue-50 border-4 border-blue-200 rounded-3xl p-8 mb-12 text-center">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                👇 お好きなキャストをお選びください 👇
-              </h2>
-              <p className="text-2xl text-gray-700 leading-relaxed">
-                写真をタップすると詳細が見れます
-              </p>
-            </div>
-
-            {/* 出勤中のキャスト表示 */}
-            {workingGirls.length > 0 && (
-              <div className="mb-16">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl p-6 mb-8 text-center">
-                  <h3 className="text-4xl font-bold flex items-center justify-center gap-4">
-                    <Clock size={40} />
-                    今すぐ遊べるキャスト
-                  </h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {workingGirls.map((girl) => (
-                    <Link
-                      key={girl.id}
-                      href={`/qr/${shopId}/book/${girl.id}`}
-                      className="group block"
-                    >
-                      <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-4 border-green-200">
-                        {/* 出勤バッジ */}
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 text-center">
-                          <span className="text-2xl font-bold">✨ 出勤中 ✨</span>
-                        </div>
-                        
-                        {/* 画像 */}
-                        <div className="relative aspect-[3/4] bg-gray-100">
-                          <Image
-                            src={girl.thumbnail_url || '/placeholder-girl.jpg'}
-                            alt={girl.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            className="object-cover"
-                            priority={true}
-                          />
-                        </div>
-                        
-                        {/* 情報 */}
-                        <div className="p-8 text-center">
-                          <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                            {girl.name}
-                          </h3>
-                          <div className="space-y-3 text-2xl text-gray-700 mb-6">
-                            <p>年齢: <span className="font-semibold">{girl.age}歳</span></p>
-                            <p>身長: <span className="font-semibold">T{girl.height}cm</span></p>
-                            <p>スリーサイズ: <span className="font-semibold">B{girl.bust} W{girl.waist} H{girl.hip}</span></p>
-                          </div>
-                          
-                          {/* 予約ボタン */}
-                          <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white py-5 rounded-2xl text-2xl font-bold flex items-center justify-center gap-3 group-hover:from-rose-600 group-hover:to-pink-700 transition-all">
-                            <span>このキャストを予約する</span>
-                            <ArrowRight size={32} />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* その他のキャスト */}
-            {otherGirls.length > 0 && (
-              <div>
-                <div className="bg-gray-100 rounded-3xl p-6 mb-8 text-center">
-                  <h3 className="text-4xl font-bold text-gray-800 flex items-center justify-center gap-4">
-                    <User size={40} />
-                    在籍キャスト一覧
-                  </h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {otherGirls.map((girl) => (
-                    <Link
-                      key={girl.id}
-                      href={`/qr/${shopId}/book/${girl.id}`}
-                      className="group block"
-                    >
-                      <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                        {/* 画像 */}
-                        <div className="relative aspect-[3/4] bg-gray-100">
-                          {girl.is_new && (
-                            <div className="absolute top-4 left-4 z-10 bg-rose-500 text-white px-6 py-3 rounded-full text-2xl font-bold">
-                              NEW
-                            </div>
-                          )}
-                          <Image
-                            src={girl.thumbnail_url || '/placeholder-girl.jpg'}
-                            alt={girl.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            className="object-cover"
-                            priority={false}
-                          />
-                        </div>
-                        
-                        {/* 情報 */}
-                        <div className="p-8 text-center">
-                          <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                            {girl.name}
-                          </h3>
-                          <div className="space-y-3 text-2xl text-gray-700 mb-6">
-                            <p>年齢: <span className="font-semibold">{girl.age}歳</span></p>
-                            <p>身長: <span className="font-semibold">T{girl.height}cm</span></p>
-                            <p>スリーサイズ: <span className="font-semibold">B{girl.bust} W{girl.waist} H{girl.hip}</span></p>
-                          </div>
-                          
-                          {/* 予約ボタン */}
-                          <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white py-5 rounded-2xl text-2xl font-bold flex items-center justify-center gap-3 group-hover:from-gray-700 group-hover:to-gray-800 transition-all">
-                            <span>このキャストを予約する</span>
-                            <ArrowRight size={32} />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* キャストがいない場合 */}
-            {sortedGirls.length === 0 && (
-              <div className="bg-yellow-50 border-3 border-yellow-200 rounded-2xl p-8 text-center">
-                <p className="text-xl md:text-2xl text-gray-700 font-semibold">
-                  現在、キャストの登録がありません
-                </p>
-                <p className="text-lg text-gray-600 mt-3">
-                  お電話でお問い合わせください
-                </p>
-                <a 
-                  href={`tel:${shop.phone?.replace(/-/g, '')}`}
-                  className="inline-flex items-center gap-3 bg-rose-500 text-white px-8 py-4 rounded-xl text-2xl font-bold hover:bg-rose-600 transition-all transform hover:scale-105 shadow-xl mt-6"
-                >
-                  <Phone size={32} />
-                  <span>{shop.phone}</span>
-                </a>
-              </div>
             )}
           </div>
         </section>
+      )}
 
-        {/* 電話予約の案内 */}
-        <section className="bg-gradient-to-r from-rose-500 to-pink-600 py-16">
-          <div className="container mx-auto px-6">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                電話でのご予約も受付中
-              </h2>
-              <p className="text-lg text-white/90 mb-6">
-                お気軽にお電話ください
-              </p>
-              <a 
-                href={`tel:${shop.phone?.replace(/-/g, '')}`}
-                className="inline-flex items-center gap-3 bg-white text-rose-600 px-10 py-5 rounded-xl text-2xl md:text-3xl font-bold hover:bg-rose-50 transition-all transform hover:scale-105 shadow-2xl"
-              >
-                <Phone size={36} />
-                <span>{shop.phone}</span>
-              </a>
-            </div>
+      {/* フッター電話予約 */}
+      {phoneHref && (
+        <section className="max-w-2xl mx-auto px-6 mt-12">
+          <div className="bg-[#1a1a1a] text-white rounded-3xl p-8 text-center shadow-md">
+            <p className="text-xl mb-4">
+              分からない場合は<br />お電話ください
+            </p>
+            <a
+              href={phoneHref}
+              className="inline-flex items-center gap-3 bg-white text-[#1a1a1a] rounded-2xl py-5 px-8 text-2xl font-bold active:scale-95 transition-transform shadow"
+            >
+              <Phone size={28} strokeWidth={2.5} />
+              <span>{shop.phone}</span>
+            </a>
           </div>
         </section>
-      </main>
-      <Footer />
-    </>
+      )}
+    </main>
+  );
+}
+
+function QRGirlCard({
+  girl,
+  shopId,
+  accent,
+}: {
+  girl: { id: string; name: string; age: number | null; height: number | null; bust: number | null; thumbnail_url: string | null; is_new?: boolean };
+  shopId: string;
+  accent: 'emerald' | 'default';
+}) {
+  const borderClass =
+    accent === 'emerald' ? 'border-emerald-400' : 'border-[#e5e0d4]';
+  const ctaBg =
+    accent === 'emerald'
+      ? 'bg-emerald-600 active:bg-emerald-700'
+      : 'bg-[#1a1a1a] active:bg-black';
+
+  return (
+    <Link
+      href={`/qr/${shopId}/book/${girl.id}`}
+      className={`block bg-white rounded-3xl overflow-hidden shadow-md border-2 ${borderClass} active:scale-[0.98] transition-transform`}
+    >
+      <div className="flex">
+        {/* 写真 */}
+        <div className="relative w-36 h-48 flex-shrink-0 bg-[#f5f1e8]">
+          <Image
+            src={girl.thumbnail_url || '/placeholder-girl.jpg'}
+            alt={girl.name}
+            fill
+            sizes="144px"
+            className="object-cover"
+          />
+          {accent === 'emerald' && (
+            <div className="absolute top-2 left-2 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded">
+              出勤中
+            </div>
+          )}
+          {girl.is_new && accent !== 'emerald' && (
+            <div className="absolute top-2 left-2 bg-[#c9a961] text-[#1a1a1a] text-xs font-bold px-2 py-1 rounded">
+              NEW
+            </div>
+          )}
+        </div>
+
+        {/* 情報 */}
+        <div className="flex-1 p-4 flex flex-col justify-between">
+          <div>
+            <h3 className="text-3xl font-bold text-[#1a1a1a] mb-2">
+              {girl.name}
+            </h3>
+            <div className="text-lg text-[#555] space-y-0.5">
+              {girl.age && <div>{girl.age}歳</div>}
+              {girl.height && <div>身長 {girl.height}cm</div>}
+              {girl.bust && <div>B {girl.bust}</div>}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 予約ボタン */}
+      <div
+        className={`${ctaBg} text-white py-5 px-6 flex items-center justify-center gap-2 text-2xl font-bold`}
+      >
+        <span>この子を予約する</span>
+        <ChevronRight size={28} strokeWidth={3} />
+      </div>
+    </Link>
   );
 }
