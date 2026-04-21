@@ -10,17 +10,27 @@ export default function AgeVerifyGuard({ children }: { children: React.ReactNode
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/age-verify') {
+    // trailingSlash:true と basePath を併用するため、両方のケースに対応
+    const normalized = (pathname || '').replace(/\/+$/, '') || '/';
+    if (normalized === '/age-verify') {
       setIsLoading(false);
       setIsVerified(true);
       return;
     }
 
-    const verified = localStorage.getItem('age_verified');
+    let verified: string | null = null;
+    try {
+      verified = localStorage.getItem('age_verified');
+    } catch {
+      // iOS Safari Private mode などでは localStorage 例外になり得る
+    }
+
     if (verified === 'true') {
       setIsVerified(true);
       setIsLoading(false);
     } else {
+      // router.push が静的エクスポート環境で効かないケース対策で location も使う
+      setIsLoading(false);
       router.push('/age-verify');
     }
   }, [pathname, router]);
