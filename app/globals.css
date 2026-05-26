@@ -229,3 +229,44 @@ body {
   0% { transform: scale(1); opacity: 1; }
   100% { transform: scale(1.18); opacity: 0; }
 }
+
+/* ============================================
+   モーション削減 — アニメーション酔いする方向け
+   （iOS/Androidの「視差効果を減らす」設定をオンにすると有効）
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .qr-shimmer,
+  .qr-heart,
+  .qr-sparkle,
+  .qr-cta-pulse,
+  .qr-pulse-ring::after {
+    animation: none !important;
+  }
+  .qr-cta-pulse {
+    box-shadow: 0 12px 36px -8px rgba(255, 64, 129, 0.55),
+                0 4px 12px rgba(255, 64, 129, 0.25);
+  }
+  .lift,
+  .qr-tap-feedback {
+    transition: none !important;
+  }
+}
+
+/* 入力フォーカスは常に視認できるように（キーボード/スクリーンリーダー操作） */
+:focus-visible {
+  outline: 3px solid var(--gold, #c9a961);
+  outline-offset: 2px;
+}
+
+/* スクリーンリーダー専用テキスト（視覚的には隠す） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

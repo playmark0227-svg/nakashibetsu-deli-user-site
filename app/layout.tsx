@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Shippori_Mincho } from "next/font/google";
 import "./globals.css";
 import AgeVerifyGuard from "@/components/AgeVerifyGuard";
+
+const SITE_URL = "https://playmark0227-svg.github.io/nakashibetsu-deli-user-site";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -18,6 +20,7 @@ const shipporiMincho = Shippori_Mincho({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Velvet | 中標津 プレミアム エスコート",
     template: "%s | Velvet",
@@ -25,18 +28,38 @@ export const metadata: Metadata = {
   description: "中標津エリアの上質なエスコートサービス情報。在籍キャスト、店舗情報、出勤情報を掲載。",
   keywords: ["中標津", "デリヘル", "エスコート", "Velvet", "キャスト", "店舗情報"],
   authors: [{ name: "Velvet" }],
+  manifest: "/manifest.webmanifest",
+  applicationName: "Velvet",
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: "Velvet | 中標津 プレミアム エスコート",
     description: "中標津エリアの上質なエスコートサービス情報。",
     type: "website",
     locale: "ja_JP",
+    siteName: "Velvet",
   },
   robots: { index: true, follow: true },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Velvet",
   },
+  formatDetection: {
+    telephone: true,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#ff1f7a",
 };
 
 export default function RootLayout({

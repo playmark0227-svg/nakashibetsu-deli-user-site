@@ -13,6 +13,7 @@ import {
   Star,
   Heart,
 } from 'lucide-react';
+import StickyPhoneBar from '@/components/StickyPhoneBar';
 
 interface Girl {
   id: string;
@@ -247,9 +248,10 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
         <div className="relative max-w-2xl mx-auto px-6 pt-6 pb-8">
           <Link
             href={`/qr/${shop.id}`}
+            aria-label="女の子の一覧に戻る"
             className="qr-tap-feedback inline-flex items-center gap-2 text-base text-yellow-100 font-bold mb-4 bg-pink-900/30 backdrop-blur-sm rounded-full px-4 py-2"
           >
-            <ArrowLeft size={20} strokeWidth={3} />
+            <ArrowLeft size={20} strokeWidth={3} aria-hidden="true" />
             <span>女の子の一覧に戻る</span>
           </Link>
 
@@ -614,9 +616,15 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
               </p>
               <a
                 href={phoneHref}
+                aria-label={`${shop.name} に電話する ${shop.phone}`}
                 className="qr-tap-feedback inline-flex items-center justify-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full py-5 px-8 text-2xl md:text-3xl font-black shadow-xl border-4 border-yellow-300"
               >
-                <Phone size={28} strokeWidth={3} className="qr-heart" />
+                <Phone
+                  size={28}
+                  strokeWidth={3}
+                  className="qr-heart"
+                  aria-hidden="true"
+                />
                 <span className="tracking-wider">{shop.phone}</span>
               </a>
             </div>
@@ -627,6 +635,9 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
           </p>
         </section>
       )}
+
+      {/* ====== 画面下に固定電話バー ====== */}
+      {shop.phone && <StickyPhoneBar phone={shop.phone} shopName={shop.name} />}
     </main>
   );
 }

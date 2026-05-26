@@ -1,15 +1,43 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { Phone, Clock, Heart, Sparkles, Star, ChevronRight, MapPin } from 'lucide-react';
+import StickyPhoneBar from '@/components/StickyPhoneBar';
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const shops = await getAllShops();
   return shops.map((s) => ({ shopId: s.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ shopId: string }>;
+}): Promise<Metadata> {
+  const { shopId } = await params;
+  const shop = await getShopById(shopId);
+  if (!shop) {
+    return { title: 'ご予約', description: 'Velvet 中標津 予約ページ' };
+  }
+  const title = `${shop.name} ご予約`;
+  const desc = shop.description
+    ? `${shop.name} — ${shop.description}`
+    : `${shop.name} のご予約はこちらから。お電話 ${shop.phone ?? ''}`;
+  return {
+    title,
+    description: desc,
+    openGraph: {
+      title,
+      description: desc,
+      type: 'website',
+      siteName: 'Velvet',
+    },
+  };
 }
 
 export default async function QRShopPage({
@@ -63,7 +91,7 @@ export default async function QRShopPage({
   const phoneHref = shop.phone ? `tel:${shop.phone.replace(/-/g, '')}` : undefined;
 
   return (
-    <main className="min-h-screen qr-bg-rose pb-12">
+    <main className="min-h-screen qr-bg-rose pb-12" aria-labelledby="shop-name">
       {/* ====== 店舗ヘッダー（ホットピンク・キラキラ） ====== */}
       <section className="relative overflow-hidden qr-bg-hot text-white">
         {/* キラキラ背景 */}
@@ -86,6 +114,7 @@ export default async function QRShopPage({
 
           {/* 店舗名 */}
           <h1
+            id="shop-name"
             className="text-4xl md:text-5xl font-black mb-3 leading-tight drop-shadow-lg"
             style={{
               textShadow: '0 2px 12px rgba(0,0,0,0.35), 0 0 24px rgba(255,255,255,0.2)',
@@ -107,9 +136,10 @@ export default async function QRShopPage({
           {phoneHref && (
             <a
               href={phoneHref}
+              aria-label={`${shop.name} に電話して予約する ${shop.phone}`}
               className="qr-cta-pulse qr-tap-feedback inline-flex items-center justify-center gap-3 bg-white text-pink-600 rounded-full py-5 px-8 text-3xl font-black shadow-2xl border-4 border-yellow-300 mb-3"
             >
-              <Phone size={32} strokeWidth={3} className="qr-heart" />
+              <Phone size={32} strokeWidth={3} className="qr-heart" aria-hidden="true" />
               <span className="tracking-wider">{shop.phone}</span>
             </a>
           )}
@@ -250,9 +280,10 @@ export default async function QRShopPage({
             {phoneHref && (
               <a
                 href={phoneHref}
+                aria-label={`${shop.name} に電話する ${shop.phone}`}
                 className="qr-tap-feedback inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full py-5 px-8 text-2xl font-black shadow-xl"
               >
-                <Phone size={28} />
+                <Phone size={28} aria-hidden="true" />
                 <span>{shop.phone}</span>
               </a>
             )}
@@ -281,9 +312,10 @@ export default async function QRShopPage({
               </p>
               <a
                 href={phoneHref}
+                aria-label={`${shop.name} に電話する ${shop.phone}`}
                 className="qr-cta-pulse qr-tap-feedback inline-flex items-center justify-center gap-3 bg-white text-pink-600 rounded-full py-5 px-8 text-3xl font-black shadow-2xl border-4 border-yellow-300"
               >
-                <Phone size={32} strokeWidth={3} />
+                <Phone size={32} strokeWidth={3} aria-hidden="true" />
                 <span className="tracking-wider">{shop.phone}</span>
               </a>
             </div>
@@ -294,6 +326,9 @@ export default async function QRShopPage({
           </p>
         </section>
       )}
+
+      {/* ====== 画面下に固定電話バー ====== */}
+      {shop.phone && <StickyPhoneBar phone={shop.phone} shopName={shop.name} />}
     </main>
   );
 }

@@ -1,0 +1,26 @@
+{
+  "name": "Velvet — 中標津 プレミアム エスコート",
+  "short_name": "Velvet",
+  "description": "中標津エリアの上質なエスコートサービス予約サイト。",
+  "start_url": "/nakashibetsu-deli-user-site/",
+  "scope": "/nakashibetsu-deli-user-site/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff5f8",
+  "theme_color": "#ff1f7a",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/nakashibetsu-deli-user-site/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/nakashibetsu-deli-user-site/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
