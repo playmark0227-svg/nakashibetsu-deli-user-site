@@ -8,17 +8,19 @@ const SITE_URL = "https://playmark0227-svg.github.io/nakashibetsu-deli-user-site
 // so we prepend it manually for GitHub Pages.
 const BASE = process.env.NODE_ENV === "production" ? "/nakashibetsu-deli-user-site" : "";
 
+// Trimmed weights: each Japanese font weight subset is ~100KB.
+// Only ship weights actually used by classNames in the codebase.
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
 const shipporiMincho = Shippori_Mincho({
   variable: "--font-shippori-mincho",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "700"],
   display: "swap",
 });
 

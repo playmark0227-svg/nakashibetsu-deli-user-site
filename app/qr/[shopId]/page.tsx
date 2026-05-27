@@ -1,11 +1,10 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
-import { Phone, Clock, Heart, Sparkles, Star, ChevronRight, MapPin } from 'lucide-react';
+import { Phone, Clock, Sparkles, Star, MapPin } from 'lucide-react';
 import StickyPhoneBar from '@/components/StickyPhoneBar';
+import QRCastTabs from '@/components/QRCastTabs';
 
 export const dynamicParams = false;
 
@@ -188,11 +187,36 @@ export default async function QRShopPage({
             ♡
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-600 rounded-full px-4 py-1.5 text-sm font-bold uppercase tracking-wider mb-3">
-            <span className="qr-heart">♥</span>
-            <span>Step 1</span>
-            <span className="qr-heart">♥</span>
-          </div>
+          {/* STEP プログレスインジケータ */}
+          <ol
+            aria-label="予約ステップ"
+            className="inline-flex items-center justify-center gap-2 mb-3 text-xs font-black tracking-wider"
+          >
+            <li
+              aria-current="step"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500 text-white shadow"
+            >
+              <span
+                className="flex items-center justify-center w-5 h-5 rounded-full bg-white text-pink-600 text-[10px] font-black"
+                aria-hidden="true"
+              >
+                1
+              </span>
+              <span>女の子選択</span>
+            </li>
+            <span className="text-pink-300" aria-hidden="true">
+              ▸
+            </span>
+            <li className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-100 text-pink-500">
+              <span
+                className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-200 text-pink-700 text-[10px] font-black"
+                aria-hidden="true"
+              >
+                2
+              </span>
+              <span>内容入力</span>
+            </li>
+          </ol>
 
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 leading-tight">
             お好きな女の子を
@@ -206,87 +230,28 @@ export default async function QRShopPage({
         </div>
       </section>
 
-      {/* ====== 今すぐ会える女の子 ====== */}
-      {workingGirls.length > 0 && (
-        <section className="max-w-2xl mx-auto px-6 mb-10">
-          {/* 緑の出勤中バナー */}
-          <div className="relative qr-bg-working text-white rounded-3xl py-5 px-6 mb-6 text-center shadow-xl overflow-hidden">
-            <div className="absolute inset-0 qr-shimmer pointer-events-none" />
-            <div className="relative">
-              <div className="flex items-center justify-center gap-2 text-yellow-200 text-xs font-bold tracking-[0.4em] uppercase mb-1">
-                <Sparkles size={14} className="qr-sparkle" />
-                <span>Available Now</span>
-                <Sparkles size={14} className="qr-sparkle" />
-              </div>
-              <h3 className="text-3xl md:text-4xl font-black flex items-center justify-center gap-2">
-                <span className="qr-heart">✨</span>
-                <span>今すぐ会える女の子</span>
-                <span className="qr-heart">✨</span>
-              </h3>
-            </div>
-          </div>
+      {/* ====== キャスト一覧（タブ切り替え） ====== */}
+      <QRCastTabs
+        workingGirls={workingGirls}
+        otherGirls={otherGirls}
+        shopId={shopId}
+      />
 
-          <div className="space-y-5">
-            {workingGirls.map((girl) => (
-              <QRGirlCard
-                key={girl.id}
-                girl={girl}
-                shopId={shopId}
-                accent="working"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ====== 在籍キャスト一覧 ====== */}
-      {otherGirls.length > 0 && (
-        <section className="max-w-2xl mx-auto px-6 mb-10">
-          <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-3xl py-5 px-6 mb-6 text-center shadow-xl">
-            <div className="flex items-center justify-center gap-2 text-pink-100 text-xs font-bold tracking-[0.4em] uppercase mb-1">
-              <Heart size={14} className="qr-heart fill-pink-100" />
-              <span>All Cast</span>
-              <Heart size={14} className="qr-heart fill-pink-100" />
-            </div>
-            <h3 className="text-3xl md:text-4xl font-black">在籍キャスト</h3>
-          </div>
-
-          <div className="space-y-5">
-            {otherGirls.map((girl) => (
-              <QRGirlCard
-                key={girl.id}
-                girl={girl}
-                shopId={shopId}
-                accent="default"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* キャストなし */}
-      {workingGirls.length === 0 && otherGirls.length === 0 && (
+      {/* キャストなし — 電話CTA（タブ自体に空メッセージあり、店舗自体にキャスト未登録の時用） */}
+      {workingGirls.length === 0 && otherGirls.length === 0 && phoneHref && (
         <section className="max-w-2xl mx-auto px-6 mt-6">
-          <div className="bg-white rounded-3xl p-10 text-center shadow-xl border-4 border-pink-200">
-            <div className="text-6xl mb-4">💌</div>
-            <p className="text-2xl text-gray-800 font-bold mb-3">
-              現在キャストの
-              <br />
-              登録がありません
-            </p>
-            <p className="text-lg text-gray-600 mb-6">
+          <div className="bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-pink-200">
+            <p className="text-lg text-gray-700 mb-5 font-bold">
               お電話でお問い合わせください
             </p>
-            {phoneHref && (
-              <a
-                href={phoneHref}
-                aria-label={`${shop.name} に電話する ${shop.phone}`}
-                className="qr-tap-feedback inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full py-5 px-8 text-2xl font-black shadow-xl"
-              >
-                <Phone size={28} aria-hidden="true" />
-                <span>{shop.phone}</span>
-              </a>
-            )}
+            <a
+              href={phoneHref}
+              aria-label={`${shop.name} に電話する ${shop.phone}`}
+              className="qr-tap-feedback inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full py-5 px-8 text-2xl font-black shadow-xl"
+            >
+              <Phone size={28} aria-hidden="true" />
+              <span>{shop.phone}</span>
+            </a>
           </div>
         </section>
       )}
@@ -333,110 +298,3 @@ export default async function QRShopPage({
   );
 }
 
-function QRGirlCard({
-  girl,
-  shopId,
-  accent,
-}: {
-  girl: {
-    id: string;
-    name: string;
-    age: number | null;
-    height: number | null;
-    bust: number | null;
-    waist?: number | null;
-    hip?: number | null;
-    thumbnail_url: string | null;
-    is_new?: boolean;
-  };
-  shopId: string;
-  accent: 'working' | 'default';
-}) {
-  const isWorking = accent === 'working';
-
-  return (
-    <Link
-      href={`/qr/${shopId}/book/${girl.id}`}
-      className={`qr-tap-feedback block bg-white rounded-3xl overflow-hidden shadow-xl border-4 ${
-        isWorking ? 'border-emerald-400' : 'border-pink-200'
-      }`}
-    >
-      <div className="flex">
-        {/* 写真 */}
-        <div className="relative w-40 h-52 md:w-48 md:h-60 flex-shrink-0 bg-pink-50">
-          <Image
-            src={girl.thumbnail_url || '/placeholder-girl.jpg'}
-            alt={girl.name}
-            fill
-            sizes="200px"
-            className="object-cover"
-          />
-          {/* 出勤中バッジ */}
-          {isWorking && (
-            <div className="absolute top-2 left-2 qr-pulse-ring bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-              <span>✨</span>
-              <span>出勤中</span>
-            </div>
-          )}
-          {/* NEW バッジ */}
-          {girl.is_new && !isWorking && (
-            <div className="absolute top-2 left-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg">
-              NEW ♥
-            </div>
-          )}
-          {/* ハート装飾 */}
-          <div className="absolute top-2 right-2 text-pink-400 text-2xl drop-shadow-lg">
-            ♥
-          </div>
-        </div>
-
-        {/* 情報 */}
-        <div className="flex-1 p-4 flex flex-col justify-between bg-gradient-to-br from-white to-pink-50">
-          <div>
-            <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-2 leading-tight">
-              {girl.name}
-              <span className="text-pink-500 ml-1">♥</span>
-            </h3>
-            <div className="space-y-1 text-base md:text-lg text-gray-700 font-bold">
-              {girl.age && (
-                <div className="flex items-center gap-2">
-                  <span className="text-pink-400">●</span>
-                  <span>{girl.age}歳</span>
-                </div>
-              )}
-              {girl.height && (
-                <div className="flex items-center gap-2">
-                  <span className="text-pink-400">●</span>
-                  <span>身長 {girl.height}cm</span>
-                </div>
-              )}
-              {(girl.bust || girl.waist || girl.hip) && (
-                <div className="flex items-center gap-2">
-                  <span className="text-pink-400">●</span>
-                  <span>
-                    {girl.bust && `B${girl.bust}`}
-                    {girl.waist && ` W${girl.waist}`}
-                    {girl.hip && ` H${girl.hip}`}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 予約ボタン */}
-      <div
-        className={`py-5 px-6 flex items-center justify-center gap-2 text-2xl md:text-3xl font-black text-white ${
-          isWorking
-            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
-            : 'bg-gradient-to-r from-pink-500 to-rose-500'
-        }`}
-      >
-        <span className="qr-heart">♥</span>
-        <span>この子を予約する</span>
-        <ChevronRight size={28} strokeWidth={3} />
-      </div>
-    </Link>
-  );
-}

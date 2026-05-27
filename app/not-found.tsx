@@ -1,59 +1,65 @@
 import Link from 'next/link';
-import { Home, Search, AlertCircle } from 'lucide-react';
+import { Home, Search, Sparkles } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-        <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-pink-100 to-purple-100 mb-4">
-            <AlertCircle className="text-pink-600" size={40} />
+    <div className="min-h-screen qr-bg-rose flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 md:p-10 text-center border-4 border-pink-300 relative overflow-hidden">
+        <div
+          className="absolute inset-0 qr-glitter pointer-events-none opacity-50"
+          aria-hidden="true"
+        />
+
+        <div className="relative">
+          <div className="flex items-center justify-center gap-2 mb-2 text-pink-400">
+            <Sparkles size={18} className="qr-sparkle" aria-hidden="true" />
+            <span className="text-xs font-black tracking-[0.4em] uppercase">
+              Page Not Found
+            </span>
+            <Sparkles size={18} className="qr-sparkle" aria-hidden="true" />
           </div>
-          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">
+
+          <h1 className="text-7xl md:text-8xl font-black bg-gradient-to-br from-pink-500 to-rose-600 bg-clip-text text-transparent leading-none">
             404
           </h1>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            ページが見つかりません
+
+          <div className="qr-underline w-24 mx-auto my-4" aria-hidden="true" />
+
+          <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 leading-tight">
+            ページが
+            <br />
+            見つかりません
+            <span className="qr-heart inline-block ml-1 text-pink-500" aria-hidden="true">
+              ♡
+            </span>
           </h2>
-          <p className="text-gray-600">
-            お探しのページは存在しないか、移動した可能性があります。
+          <p className="text-base text-gray-700 font-bold mb-8">
+            お探しのページは存在しないか、
+            <br />
+            移動した可能性があります
           </p>
-        </div>
 
-        <div className="space-y-3">
-          <Link
-            href="/"
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg transition-all font-semibold"
-          >
-            <Home size={20} />
-            <span>トップページへ戻る</span>
-          </Link>
-
-          <Link
-            href="/girls"
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all font-semibold"
-          >
-            <Search size={20} />
-            <span>キャスト一覧を見る</span>
-          </Link>
-        </div>
-
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-500 mb-3">人気のページ</p>
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="space-y-3">
             <Link
-              href="/shops"
-              className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition-colors"
+              href="/"
+              className="qr-tap-feedback qr-cta-pulse w-full flex items-center justify-center gap-2 px-6 py-4 bg-white text-pink-600 rounded-full text-xl font-black shadow-xl border-4 border-yellow-300"
             >
-              店舗一覧
+              <Home size={22} strokeWidth={3} aria-hidden="true" />
+              <span>トップへ戻る</span>
             </Link>
+
             <Link
               href="/girls"
-              className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition-colors"
+              className="qr-tap-feedback w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full text-lg font-black shadow-lg border-2 border-pink-300"
             >
-              キャスト一覧
+              <Search size={20} strokeWidth={3} aria-hidden="true" />
+              <span>キャスト一覧</span>
             </Link>
           </div>
+
+          <p className="mt-6 text-xs text-pink-400 font-bold">
+            ♥ Velvet — Nakashibetsu Premium ♥
+          </p>
         </div>
       </div>
     </div>

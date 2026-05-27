@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block bot indexing of QR pages (店舗専用、検索不要)
+User-agent: *
+Disallow: /qr/
+
+Sitemap: https://playmark0227-svg.github.io/nakashibetsu-deli-user-site/sitemap.xml

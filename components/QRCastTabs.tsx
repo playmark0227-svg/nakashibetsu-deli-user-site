@@ -1,0 +1,241 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ChevronRight, Heart, Sparkles } from 'lucide-react';
+
+interface Girl {
+  id: string;
+  name: string;
+  age: number | null;
+  height: number | null;
+  bust: number | null;
+  waist?: number | null;
+  hip?: number | null;
+  thumbnail_url: string | null;
+  is_new?: boolean;
+  status?: string;
+  instant_available?: boolean;
+}
+
+interface QRCastTabsProps {
+  workingGirls: Girl[];
+  otherGirls: Girl[];
+  shopId: string;
+}
+
+type Tab = 'now' | 'all';
+
+export default function QRCastTabs({
+  workingGirls,
+  otherGirls,
+  shopId,
+}: QRCastTabsProps) {
+  const hasWorking = workingGirls.length > 0;
+  const [tab, setTab] = useState<Tab>(hasWorking ? 'now' : 'all');
+
+  const displayed = tab === 'now' ? workingGirls : [...workingGirls, ...otherGirls];
+
+  return (
+    <section className="max-w-2xl mx-auto px-6 mb-10">
+      {/* タブ切り替え */}
+      <div
+        role="tablist"
+        aria-label="キャスト表示切り替え"
+        className="grid grid-cols-2 gap-2 mb-6 bg-white rounded-full p-1.5 shadow-lg border-4 border-pink-200"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'now'}
+          aria-controls="qr-cast-list"
+          onClick={() => setTab('now')}
+          disabled={!hasWorking}
+          className={`qr-tap-feedback flex items-center justify-center gap-2 py-3 px-3 rounded-full text-base md:text-lg font-black transition ${
+            tab === 'now'
+              ? 'qr-bg-working text-white shadow-lg'
+              : hasWorking
+                ? 'bg-transparent text-gray-700 hover:bg-pink-50'
+                : 'bg-transparent text-gray-300 cursor-not-allowed'
+          }`}
+        >
+          <Sparkles size={18} strokeWidth={3} aria-hidden="true" />
+          <span className="whitespace-nowrap">
+            今すぐ会える
+            {hasWorking && (
+              <span
+                className={`ml-1.5 inline-block min-w-[1.5em] px-1.5 py-0.5 rounded-full text-xs font-black ${
+                  tab === 'now'
+                    ? 'bg-white/30 text-white'
+                    : 'bg-emerald-100 text-emerald-700'
+                }`}
+              >
+                {workingGirls.length}
+              </span>
+            )}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'all'}
+          aria-controls="qr-cast-list"
+          onClick={() => setTab('all')}
+          className={`qr-tap-feedback flex items-center justify-center gap-2 py-3 px-3 rounded-full text-base md:text-lg font-black transition ${
+            tab === 'all'
+              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
+              : 'bg-transparent text-gray-700 hover:bg-pink-50'
+          }`}
+        >
+          <Heart size={18} strokeWidth={3} aria-hidden="true" />
+          <span className="whitespace-nowrap">
+            全員
+            <span
+              className={`ml-1.5 inline-block min-w-[1.5em] px-1.5 py-0.5 rounded-full text-xs font-black ${
+                tab === 'all' ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-700'
+              }`}
+            >
+              {workingGirls.length + otherGirls.length}
+            </span>
+          </span>
+        </button>
+      </div>
+
+      {/* 一覧 */}
+      <div id="qr-cast-list" role="tabpanel" className="space-y-5">
+        {displayed.length === 0 ? (
+          <div className="bg-white rounded-3xl p-10 text-center shadow-xl border-4 border-pink-200">
+            <div className="text-5xl mb-3" aria-hidden="true">
+              💌
+            </div>
+            <p className="text-xl text-gray-800 font-black">
+              現在
+              {tab === 'now' ? '出勤中のキャストはいません' : 'キャストの登録がありません'}
+            </p>
+          </div>
+        ) : (
+          displayed.map((girl) => {
+            const isWorking =
+              girl.status === 'working' || girl.instant_available === true;
+            return (
+              <QRGirlCard
+                key={girl.id}
+                girl={girl}
+                shopId={shopId}
+                accent={isWorking ? 'working' : 'default'}
+              />
+            );
+          })
+        )}
+      </div>
+    </section>
+  );
+}
+
+function QRGirlCard({
+  girl,
+  shopId,
+  accent,
+}: {
+  girl: Girl;
+  shopId: string;
+  accent: 'working' | 'default';
+}) {
+  const isWorking = accent === 'working';
+
+  return (
+    <Link
+      href={`/qr/${shopId}/book/${girl.id}`}
+      aria-label={`${girl.name} の予約ページへ`}
+      className={`qr-tap-feedback block bg-white rounded-3xl overflow-hidden shadow-xl border-4 ${
+        isWorking ? 'border-emerald-400' : 'border-pink-200'
+      }`}
+    >
+      <div className="flex">
+        <div className="relative w-40 h-52 md:w-48 md:h-60 flex-shrink-0 bg-pink-50">
+          <Image
+            src={girl.thumbnail_url || '/placeholder-girl.jpg'}
+            alt={girl.name}
+            fill
+            sizes="200px"
+            className="object-cover"
+          />
+          {isWorking && (
+            <div className="absolute top-2 left-2 qr-pulse-ring bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+              <span aria-hidden="true">✨</span>
+              <span>出勤中</span>
+            </div>
+          )}
+          {girl.is_new && !isWorking && (
+            <div className="absolute top-2 left-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg">
+              NEW ♥
+            </div>
+          )}
+          <div
+            className="absolute top-2 right-2 text-pink-400 text-2xl drop-shadow-lg"
+            aria-hidden="true"
+          >
+            ♥
+          </div>
+        </div>
+
+        <div className="flex-1 p-4 flex flex-col justify-between bg-gradient-to-br from-white to-pink-50">
+          <div>
+            <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-2 leading-tight">
+              {girl.name}
+              <span className="text-pink-500 ml-1" aria-hidden="true">
+                ♥
+              </span>
+            </h3>
+            <div className="space-y-1 text-base md:text-lg text-gray-700 font-bold">
+              {girl.age && (
+                <div className="flex items-center gap-2">
+                  <span className="text-pink-400" aria-hidden="true">
+                    ●
+                  </span>
+                  <span>{girl.age}歳</span>
+                </div>
+              )}
+              {girl.height && (
+                <div className="flex items-center gap-2">
+                  <span className="text-pink-400" aria-hidden="true">
+                    ●
+                  </span>
+                  <span>身長 {girl.height}cm</span>
+                </div>
+              )}
+              {(girl.bust || girl.waist || girl.hip) && (
+                <div className="flex items-center gap-2">
+                  <span className="text-pink-400" aria-hidden="true">
+                    ●
+                  </span>
+                  <span>
+                    {girl.bust && `B${girl.bust}`}
+                    {girl.waist && ` W${girl.waist}`}
+                    {girl.hip && ` H${girl.hip}`}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`py-5 px-6 flex items-center justify-center gap-2 text-2xl md:text-3xl font-black text-white ${
+          isWorking
+            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
+            : 'bg-gradient-to-r from-pink-500 to-rose-500'
+        }`}
+      >
+        <span className="qr-heart" aria-hidden="true">
+          ♥
+        </span>
+        <span>この子を予約する</span>
+        <ChevronRight size={28} strokeWidth={3} aria-hidden="true" />
+      </div>
+    </Link>
+  );
+}

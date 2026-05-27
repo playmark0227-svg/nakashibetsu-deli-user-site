@@ -63,17 +63,9 @@ export default function Footer() {
             <p className="text-[11px] tracking-wider text-neutral-600">
               &copy; {currentYear} VELVET. ALL RIGHTS RESERVED.
             </p>
-            <div className="flex flex-wrap justify-center gap-6 text-[11px] tracking-wider">
-              <Link href="/privacy" className="text-neutral-500 hover:text-[#c9a961] transition-colors">
-                PRIVACY POLICY
-              </Link>
-              <Link href="/terms" className="text-neutral-500 hover:text-[#c9a961] transition-colors">
-                TERMS
-              </Link>
-              <Link href="/sitemap" className="text-neutral-500 hover:text-[#c9a961] transition-colors">
-                SITEMAP
-              </Link>
-            </div>
+            <p className="text-[11px] tracking-[0.25em] text-[#c9a961] uppercase">
+              18歳未満ご利用禁止
+            </p>
           </div>
         </div>
       </div>

@@ -256,13 +256,36 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
           </Link>
 
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2 text-yellow-200">
-              <Sparkles size={18} className="qr-sparkle" />
-              <span className="text-xs font-bold tracking-[0.4em] uppercase">
-                Step 2
+            {/* STEP プログレスインジケータ */}
+            <ol
+              aria-label="予約ステップ"
+              className="flex items-center justify-center gap-2 mb-4 text-xs font-black tracking-wider"
+            >
+              <li className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-900/40 backdrop-blur-sm text-yellow-100">
+                <span
+                  className="flex items-center justify-center w-5 h-5 rounded-full bg-yellow-200 text-pink-700 text-[10px] font-black"
+                  aria-hidden="true"
+                >
+                  ✓
+                </span>
+                <span>女の子選択</span>
+              </li>
+              <span className="text-yellow-200/70" aria-hidden="true">
+                ▸
               </span>
-              <Sparkles size={18} className="qr-sparkle" />
-            </div>
+              <li
+                aria-current="step"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-pink-600 shadow-lg"
+              >
+                <span
+                  className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-500 text-white text-[10px] font-black"
+                  aria-hidden="true"
+                >
+                  2
+                </span>
+                <span>内容入力</span>
+              </li>
+            </ol>
 
             <h1
               className="text-3xl md:text-4xl font-black leading-tight drop-shadow-lg"
@@ -271,9 +294,11 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
               }}
             >
               ご予約内容の入力
-              <span className="qr-heart inline-block ml-2">♥</span>
+              <span className="qr-heart inline-block ml-2" aria-hidden="true">
+                ♥
+              </span>
             </h1>
-            <div className="qr-underline w-24 mx-auto mt-3" />
+            <div className="qr-underline w-24 mx-auto mt-3" aria-hidden="true" />
           </div>
         </div>
 

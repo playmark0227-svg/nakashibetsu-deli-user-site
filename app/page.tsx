@@ -32,9 +32,9 @@ export default async function HomePage() {
       const schedule = scheduleMap.get(girl.id);
       return {
         ...girl,
-        status: schedule?.status || 'off',
-        instant_available: schedule?.instant_available || false,
-      } as any;
+        status: schedule?.status ?? 'off',
+        instant_available: schedule?.instant_available ?? false,
+      };
     });
   });
 
@@ -75,7 +75,7 @@ export default async function HomePage() {
 
               <div className="hairline-gold w-24 mb-10 ml-0" />
 
-              <p className="text-base md:text-lg text-neutral-300 leading-loose mb-12 max-w-xl font-light">
+              <p className="text-base md:text-lg text-neutral-300 leading-loose mb-12 max-w-xl">
                 中標津エリアにおける厳選された店舗と、洗練されたキャストを掲載。
                 上質なひとときを、心ゆくまでお過ごしください。
               </p>
