@@ -8,6 +8,7 @@ import { getGirlsByShopId } from '@/lib/api/girls';
 import { getPricePlansByShopId } from '@/lib/api/price-plans';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { MapPin, Phone, Clock, ArrowLeft } from 'lucide-react';
+import ShopJsonLd from '@/components/ShopJsonLd';
 
 export const dynamicParams = false;
 
@@ -55,6 +56,7 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <>
+      <ShopJsonLd shop={shop} />
       <Header />
       <main className="min-h-screen bg-[#faf7f2]">
         {/* Hero with shop image */}

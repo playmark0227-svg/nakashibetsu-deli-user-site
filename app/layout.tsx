@@ -69,6 +69,11 @@ export const viewport: Viewport = {
   themeColor: "#ff1f7a",
 };
 
+// 描画前に同期実行し、年齢確認済みなら <html data-age="ok"> を付ける。
+// これにより確認済みユーザーはゲートのちらつきなく即コンテンツが見える。
+// 未確認なら data-age 無し → CSS でゲートが被さる（本文は HTML に存在＝SEO/LCP OK）。
+const ageGateNoFlashScript = `(function(){try{if(localStorage.getItem('age_verified')==='true'){document.documentElement.setAttribute('data-age','ok')}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -76,8 +81,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: ageGateNoFlashScript }} />
+      </head>
       <body className={`${notoSansJP.variable} ${shipporiMincho.variable} antialiased`}>
-        <AgeVerifyGuard>{children}</AgeVerifyGuard>
+        {children}
+        <AgeVerifyGuard />
       </body>
     </html>
   );

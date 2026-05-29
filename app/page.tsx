@@ -9,9 +9,12 @@ import { ArrowRight, Phone, Clock, MapPin } from 'lucide-react';
 
 
 export default async function HomePage() {
-  const shops = await getAllShops();
-  const allGirls = await getAllGirls();
-  const instantGirls = await getInstantAvailableGirls();
+  // 3クエリは互いに独立なので並列に投げる（直列より速い）
+  const [shops, allGirls, instantGirls] = await Promise.all([
+    getAllShops(),
+    getAllGirls(),
+    getInstantAvailableGirls(),
+  ]);
 
   const shopGirls = shops.map(shop => {
     const shopGirlsList = allGirls.filter(g => g.shop_id === shop.id);

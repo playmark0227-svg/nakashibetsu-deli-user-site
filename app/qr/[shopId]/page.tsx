@@ -5,6 +5,7 @@ import { getSchedulesForGirls } from '@/lib/api/schedules';
 import { Phone, Clock, Sparkles, Star, MapPin } from 'lucide-react';
 import StickyPhoneBar from '@/components/StickyPhoneBar';
 import QRCastTabs from '@/components/QRCastTabs';
+import ShopJsonLd from '@/components/ShopJsonLd';
 
 export const dynamicParams = false;
 
@@ -91,6 +92,7 @@ export default async function QRShopPage({
 
   return (
     <main className="min-h-screen qr-bg-rose pb-12" aria-labelledby="shop-name">
+      <ShopJsonLd shop={shop} />
       {/* ====== 店舗ヘッダー（ホットピンク・キラキラ） ====== */}
       <section className="relative overflow-hidden qr-bg-hot text-white">
         {/* キラキラ背景 */}

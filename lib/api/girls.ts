@@ -28,8 +28,11 @@ export async function getGirlById(id: string): Promise<Girl | null> {
     return null;
   }
 
-  // ビューカウントを増やす
-  await incrementViewCount(id);
+  // 注意: 当サイトは静的エクスポート (output: 'export') のため、この関数は
+  // ビルド時にしか実行されない。以前はここで view_count をインクリメント
+  // していたが、ビルドのたびに無意味な書き込みが走るだけで実ユーザーの
+  // 閲覧は一切カウントされなかったため除去した。閲覧計測が必要になったら
+  // 詳細ページのクライアント側から RPC を呼ぶこと。
 
   return data;
 }
@@ -151,8 +154,9 @@ export async function deleteGirl(id: string): Promise<boolean> {
   return true;
 }
 
-// ビューカウントを増やす
-async function incrementViewCount(id: string): Promise<void> {
+// ビューカウントを増やす（静的サイトでは未使用。閲覧計測が必要になったら
+// 詳細ページのクライアント側からこの RPC を呼び出すこと）
+export async function incrementViewCount(id: string): Promise<void> {
   const { error } = await supabase.rpc('increment_view_count', { girl_id: id });
 
   if (error) {
