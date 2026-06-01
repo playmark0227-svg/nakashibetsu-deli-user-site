@@ -97,12 +97,9 @@ export default async function QRShopPage({
     };
   });
 
-  const workingGirls = girlsWithStatus.filter(
-    (g) => g.status === 'working' || g.instant_available
-  );
-  const otherGirls = girlsWithStatus.filter(
-    (g) => g.status !== 'working' && !g.instant_available
-  );
+  // 出勤での分類は QRCastTabs 側でクライアント最新化して行う。
+  // ここでは「店舗にキャストが1人でも登録されているか」だけ使う。
+  const hasAnyGirls = girlsWithStatus.length > 0;
 
   const phoneHref = shop.phone ? `tel:${shop.phone.replace(/-/g, '')}` : undefined;
 
@@ -266,17 +263,18 @@ export default async function QRShopPage({
         </div>
       </section>
 
-      {/* ====== キャスト一覧（タブ切り替え） ====== */}
-      <QRCastTabs
-        workingGirls={workingGirls}
-        otherGirls={otherGirls}
-        shopId={shopId}
-        minDuration={minPlan?.duration ?? null}
-        minPrice={minPlan?.price ?? null}
-      />
+      {/* ====== キャスト一覧（タブ切り替え・出勤はクライアントで最新化） ====== */}
+      {hasAnyGirls && (
+        <QRCastTabs
+          girls={girlsWithStatus}
+          shopId={shopId}
+          minDuration={minPlan?.duration ?? null}
+          minPrice={minPlan?.price ?? null}
+        />
+      )}
 
       {/* キャストなし — 電話CTA（タブ自体に空メッセージあり、店舗自体にキャスト未登録の時用） */}
-      {workingGirls.length === 0 && otherGirls.length === 0 && phoneHref && (
+      {!hasAnyGirls && phoneHref && (
         <section className="max-w-2xl mx-auto px-6 mt-6">
           <div className="bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-pink-200">
             <p className="text-lg text-gray-700 mb-5 font-bold">

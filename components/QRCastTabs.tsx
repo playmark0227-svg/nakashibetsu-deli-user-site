@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight, Heart, Sparkles, Star, Clock3, Zap } from 'lucide-react';
@@ -22,8 +22,8 @@ interface Girl {
 }
 
 interface QRCastTabsProps {
-  workingGirls: Girl[];
-  otherGirls: Girl[];
+  /** ビルド時点の全キャスト（出勤状況はマウント後にクライアントで最新化する） */
+  girls: Girl[];
   shopId: string;
   minDuration?: number | null;
   minPrice?: number | null;
@@ -31,17 +31,68 @@ interface QRCastTabsProps {
 
 type Tab = 'now' | 'all';
 
+const isWorkingNow = (g: Girl) =>
+  g.status === 'working' || g.instant_available === true;
+
 export default function QRCastTabs({
-  workingGirls,
-  otherGirls,
+  girls: initialGirls,
   shopId,
   minDuration = null,
   minPrice = null,
 }: QRCastTabsProps) {
-  const hasWorking = workingGirls.length > 0;
-  const [tab, setTab] = useState<Tab>(hasWorking ? 'now' : 'all');
+  // 出勤状況はビルド時に固定されると「ビルドした日の出勤」しか出せない。
+  // マウント後にその日の girl_schedules を取り直して鮮度を担保する。
+  const [girls, setGirls] = useState<Girl[]>(initialGirls);
 
-  const displayed = tab === 'now' ? workingGirls : [...workingGirls, ...otherGirls];
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await supabase
+          .from('girl_schedules')
+          .select('girl_id, status, instant_available')
+          .eq('date', today)
+          .in(
+            'girl_id',
+            initialGirls.map((g) => g.id)
+          );
+        if (cancelled || error || !data) return;
+        const m = new Map(
+          (data as { girl_id: string; status: string; instant_available: boolean }[]).map(
+            (s) => [s.girl_id, s]
+          )
+        );
+        setGirls((prev) =>
+          prev.map((g) => {
+            const s = m.get(g.id);
+            return {
+              ...g,
+              status: s?.status ?? 'off',
+              instant_available: s?.instant_available ?? false,
+            };
+          })
+        );
+      } catch {
+        // 取得失敗時はビルド時データのまま（フォールバック）
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialGirls]);
+
+  const workingGirls = useMemo(() => girls.filter(isWorkingNow), [girls]);
+  const otherGirls = useMemo(() => girls.filter((g) => !isWorkingNow(g)), [girls]);
+  const hasWorking = workingGirls.length > 0;
+
+  const [tab, setTab] = useState<Tab>('now');
+  // 出勤が0なら自動的に「全員」タブにフォールバック
+  const activeTab: Tab = tab === 'now' && !hasWorking ? 'all' : tab;
+
+  const displayed =
+    activeTab === 'now' ? workingGirls : [...workingGirls, ...otherGirls];
 
   return (
     <section className="max-w-2xl mx-auto px-6 mb-10">
@@ -54,12 +105,12 @@ export default function QRCastTabs({
         <button
           type="button"
           role="tab"
-          aria-selected={tab === 'now'}
+          aria-selected={activeTab === 'now'}
           aria-controls="qr-cast-list"
           onClick={() => setTab('now')}
           disabled={!hasWorking}
           className={`qr-tap-feedback flex items-center justify-center gap-2 py-3 px-3 rounded-full text-base md:text-lg font-black transition ${
-            tab === 'now'
+            activeTab === 'now'
               ? 'qr-bg-working text-white shadow-lg'
               : hasWorking
                 ? 'bg-transparent text-gray-700 hover:bg-pink-50'
@@ -72,7 +123,7 @@ export default function QRCastTabs({
             {hasWorking && (
               <span
                 className={`ml-1.5 inline-block min-w-[1.5em] px-1.5 py-0.5 rounded-full text-xs font-black ${
-                  tab === 'now'
+                  activeTab === 'now'
                     ? 'bg-white/30 text-white'
                     : 'bg-emerald-100 text-emerald-700'
                 }`}
@@ -86,11 +137,11 @@ export default function QRCastTabs({
         <button
           type="button"
           role="tab"
-          aria-selected={tab === 'all'}
+          aria-selected={activeTab === 'all'}
           aria-controls="qr-cast-list"
           onClick={() => setTab('all')}
           className={`qr-tap-feedback flex items-center justify-center gap-2 py-3 px-3 rounded-full text-base md:text-lg font-black transition ${
-            tab === 'all'
+            activeTab === 'all'
               ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
               : 'bg-transparent text-gray-700 hover:bg-pink-50'
           }`}
@@ -100,7 +151,7 @@ export default function QRCastTabs({
             全員
             <span
               className={`ml-1.5 inline-block min-w-[1.5em] px-1.5 py-0.5 rounded-full text-xs font-black ${
-                tab === 'all' ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-700'
+                activeTab === 'all' ? 'bg-white/30 text-white' : 'bg-pink-100 text-pink-700'
               }`}
             >
               {workingGirls.length + otherGirls.length}
@@ -118,7 +169,7 @@ export default function QRCastTabs({
             </div>
             <p className="text-xl text-gray-800 font-black">
               現在
-              {tab === 'now' ? '出勤中のキャストはいません' : 'キャストの登録がありません'}
+              {activeTab === 'now' ? '出勤中のキャストはいません' : 'キャストの登録がありません'}
             </p>
           </div>
         ) : (
