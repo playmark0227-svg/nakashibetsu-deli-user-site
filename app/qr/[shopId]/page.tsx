@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { getShopById, getAllShops } from '@/lib/api/shops';
 import { getGirlsByShopId } from '@/lib/api/girls';
 import { getSchedulesForGirls } from '@/lib/api/schedules';
-import { Phone, Clock, Sparkles, Star, MapPin } from 'lucide-react';
+import { getPricePlansByShopId } from '@/lib/api/price-plans';
+import { getReviewStatsForGirls } from '@/lib/api/reviews';
+import { Phone, Clock, Sparkles, Star, MapPin, Lock, JapaneseYen, HeartHandshake } from 'lucide-react';
 import StickyPhoneBar from '@/components/StickyPhoneBar';
 import QRCastTabs from '@/components/QRCastTabs';
 import ShopJsonLd from '@/components/ShopJsonLd';
@@ -69,15 +71,29 @@ export default async function QRShopPage({
   }
 
   const girlIds = girls.map((g) => g.id);
-  const schedules = await getSchedulesForGirls(girlIds);
+  // 出勤状況・レビュー統計・料金プランを並列取得
+  const [schedules, reviewStats, pricePlans] = await Promise.all([
+    getSchedulesForGirls(girlIds),
+    getReviewStatsForGirls(girlIds),
+    getPricePlansByShopId(shopId),
+  ]);
   const scheduleMap = new Map(schedules.map((s) => [s.girl_id, s]));
+
+  // 最安料金（カードに「60分 ¥◯〜」と出して料金不安を先に解消）
+  const minPlan =
+    pricePlans.length > 0
+      ? pricePlans.reduce((a, b) => (a.price <= b.price ? a : b))
+      : null;
 
   const girlsWithStatus = girls.map((girl) => {
     const schedule = scheduleMap.get(girl.id);
+    const stat = reviewStats.get(girl.id);
     return {
       ...girl,
       status: schedule?.status || 'off',
       instant_available: schedule?.instant_available || false,
+      review_count: stat?.count ?? 0,
+      review_avg: stat?.avg ?? 0,
     };
   });
 
@@ -147,6 +163,24 @@ export default async function QRShopPage({
           <p className="text-base text-pink-100 mt-1 font-bold">
             👆 タップでお電話できます 👆
           </p>
+
+          {/* 安心訴求バッジ（来店の最大の障壁=不安を解消） */}
+          <ul className="flex flex-wrap items-center justify-center gap-2 mt-6">
+            {[
+              { icon: Phone, label: '電話1本ですぐ手配' },
+              { icon: HeartHandshake, label: '初めての方も歓迎' },
+              { icon: Lock, label: '秘密厳守' },
+              { icon: JapaneseYen, label: '明朗会計' },
+            ].map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="flex items-center gap-1.5 bg-white/95 text-pink-700 rounded-full pl-2.5 pr-3.5 py-1.5 text-sm font-black shadow-md"
+              >
+                <Icon size={16} strokeWidth={2.8} aria-hidden="true" />
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
 
           {/* 営業時間・住所 */}
           <div className="flex flex-col gap-2 items-center mt-6 text-base text-pink-50">
@@ -237,6 +271,8 @@ export default async function QRShopPage({
         workingGirls={workingGirls}
         otherGirls={otherGirls}
         shopId={shopId}
+        minDuration={minPlan?.duration ?? null}
+        minPrice={minPlan?.price ?? null}
       />
 
       {/* キャストなし — 電話CTA（タブ自体に空メッセージあり、店舗自体にキャスト未登録の時用） */}

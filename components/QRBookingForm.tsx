@@ -354,6 +354,55 @@ export default function QRBookingForm({ girl, shop, pricePlans }: QRBookingFormP
         </div>
       </section>
 
+      {/* ====== ご予約後の流れ（「予約したらどうなる？」の不安を解消） ====== */}
+      <section className="max-w-2xl mx-auto px-6 mb-6">
+        <div className="bg-white rounded-3xl shadow-lg border-4 border-pink-200 p-5">
+          <div className="flex items-center justify-center gap-2 text-pink-500 text-xs font-black tracking-[0.3em] uppercase mb-4">
+            <span className="qr-heart" aria-hidden="true">
+              ♥
+            </span>
+            <span>ご予約後の流れ</span>
+            <span className="qr-heart" aria-hidden="true">
+              ♥
+            </span>
+          </div>
+          <ol className="grid grid-cols-3 gap-2 text-center">
+            {[
+              { n: '1', emoji: '📞', t: 'お店から', t2: '確認のお電話' },
+              { n: '2', emoji: '🚗', t: '女の子が', t2: 'お迎えに向かう' },
+              { n: '3', emoji: '💖', t: '指定場所で', t2: 'お待ち合わせ' },
+            ].map((s, i) => (
+              <li key={s.n} className="relative flex flex-col items-center">
+                <div className="relative">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 border-2 border-pink-300 text-3xl mb-2">
+                    <span aria-hidden="true">{s.emoji}</span>
+                  </div>
+                  <span className="absolute -top-1 -left-1 flex items-center justify-center w-6 h-6 rounded-full bg-pink-500 text-white text-xs font-black shadow">
+                    {s.n}
+                  </span>
+                </div>
+                <span className="text-sm font-black text-gray-800 leading-tight">
+                  {s.t}
+                  <br />
+                  {s.t2}
+                </span>
+                {i < 2 && (
+                  <span
+                    className="absolute top-7 -right-1 text-pink-300 text-lg font-black"
+                    aria-hidden="true"
+                  >
+                    ▸
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+          <p className="text-center text-sm text-gray-600 font-bold mt-4 bg-pink-50 rounded-xl py-2.5 px-3">
+            ✨ 入力は1分で完了。あとはお電話を待つだけ ✨
+          </p>
+        </div>
+      </section>
+
       {/* ====== フォーム ====== */}
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-6 space-y-5">
         {/* お名前 */}

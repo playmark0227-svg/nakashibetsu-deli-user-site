@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, Heart, Sparkles } from 'lucide-react';
+import { ChevronRight, Heart, Sparkles, Star, Clock3, Zap } from 'lucide-react';
 
 interface Girl {
   id: string;
@@ -17,12 +17,16 @@ interface Girl {
   is_new?: boolean;
   status?: string;
   instant_available?: boolean;
+  review_count?: number;
+  review_avg?: number;
 }
 
 interface QRCastTabsProps {
   workingGirls: Girl[];
   otherGirls: Girl[];
   shopId: string;
+  minDuration?: number | null;
+  minPrice?: number | null;
 }
 
 type Tab = 'now' | 'all';
@@ -31,6 +35,8 @@ export default function QRCastTabs({
   workingGirls,
   otherGirls,
   shopId,
+  minDuration = null,
+  minPrice = null,
 }: QRCastTabsProps) {
   const hasWorking = workingGirls.length > 0;
   const [tab, setTab] = useState<Tab>(hasWorking ? 'now' : 'all');
@@ -125,6 +131,8 @@ export default function QRCastTabs({
                 girl={girl}
                 shopId={shopId}
                 accent={isWorking ? 'working' : 'default'}
+                minDuration={minDuration}
+                minPrice={minPrice}
               />
             );
           })
@@ -138,12 +146,18 @@ function QRGirlCard({
   girl,
   shopId,
   accent,
+  minDuration,
+  minPrice,
 }: {
   girl: Girl;
   shopId: string;
   accent: 'working' | 'default';
+  minDuration: number | null;
+  minPrice: number | null;
 }) {
   const isWorking = accent === 'working';
+  const isInstant = girl.instant_available === true;
+  const hasReviews = (girl.review_count ?? 0) > 0;
 
   return (
     <Link
@@ -162,7 +176,14 @@ function QRGirlCard({
             sizes="200px"
             className="object-cover"
           />
-          {isWorking && (
+          {/* 即対応バッジ（最も予約に効く「今すぐ」訴求） */}
+          {isInstant && (
+            <div className="absolute top-2 left-2 qr-pulse-ring bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-black px-2.5 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+              <Zap size={12} strokeWidth={3} aria-hidden="true" className="fill-white" />
+              <span>即対応OK</span>
+            </div>
+          )}
+          {isWorking && !isInstant && (
             <div className="absolute top-2 left-2 qr-pulse-ring bg-emerald-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
               <span aria-hidden="true">✨</span>
               <span>出勤中</span>
@@ -183,13 +204,42 @@ function QRGirlCard({
 
         <div className="flex-1 p-4 flex flex-col justify-between bg-gradient-to-br from-white to-pink-50">
           <div>
-            <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-2 leading-tight">
+            <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-1 leading-tight">
               {girl.name}
               <span className="text-pink-500 ml-1" aria-hidden="true">
                 ♥
               </span>
             </h3>
-            <div className="space-y-1 text-base md:text-lg text-gray-700 font-bold">
+
+            {/* 実レビューの評価（社会的証明）。0件のときは出さない */}
+            {hasReviews && (
+              <div
+                className="flex items-center gap-1 mb-2"
+                aria-label={`評価 ${girl.review_avg} / 5、口コミ ${girl.review_count}件`}
+              >
+                <span className="flex items-center" aria-hidden="true">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star
+                      key={i}
+                      size={15}
+                      className={
+                        i < Math.round(girl.review_avg ?? 0)
+                          ? 'text-amber-400 fill-amber-400'
+                          : 'text-gray-300'
+                      }
+                    />
+                  ))}
+                </span>
+                <span className="text-sm font-black text-amber-600">
+                  {girl.review_avg?.toFixed(1)}
+                </span>
+                <span className="text-xs font-bold text-gray-500">
+                  （口コミ{girl.review_count}）
+                </span>
+              </div>
+            )}
+
+            <div className="space-y-0.5 text-base md:text-lg text-gray-700 font-bold">
               {girl.age && (
                 <div className="flex items-center gap-2">
                   <span className="text-pink-400" aria-hidden="true">
@@ -219,6 +269,17 @@ function QRGirlCard({
                 </div>
               )}
             </div>
+
+            {/* 最安料金（料金不安を先に解消） */}
+            {minPrice != null && (
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-pink-100 text-pink-700 rounded-lg px-2.5 py-1 text-sm font-black">
+                <Clock3 size={14} strokeWidth={3} aria-hidden="true" />
+                <span>
+                  {minDuration ? `${minDuration}分 ` : ''}¥
+                  {minPrice.toLocaleString()}〜
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -233,7 +294,7 @@ function QRGirlCard({
         <span className="qr-heart" aria-hidden="true">
           ♥
         </span>
-        <span>この子を予約する</span>
+        <span>{isInstant ? '今すぐこの子を呼ぶ' : 'この子を予約する'}</span>
         <ChevronRight size={28} strokeWidth={3} aria-hidden="true" />
       </div>
     </Link>
